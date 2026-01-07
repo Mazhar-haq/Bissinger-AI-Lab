@@ -15,6 +15,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
             background: #f5f5f5;
+            color: #333;
         }
 
         .header {
@@ -24,6 +25,7 @@
             border-radius: 10px;
             margin-bottom: 30px;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .header h1 {
@@ -31,32 +33,53 @@
             margin-bottom: 10px;
         }
 
+        .header p {
+            opacity: 0.9;
+        }
+
         .date-section {
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .date-input {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-bottom: 20px;
             flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
         }
 
-        .date-input label {
+        .date-inputs-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group label {
             font-weight: 600;
             color: #2c3e50;
+            white-space: nowrap;
         }
 
-        .date-input input {
+        .input-group input, .input-group select {
             padding: 8px 12px;
             border: 2px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
+            background: #fff;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #3498db;
         }
 
         .location-section {
@@ -64,7 +87,8 @@
             padding: 25px;
             border-radius: 8px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow-x: auto;
         }
 
         .location-header {
@@ -73,22 +97,27 @@
             padding: 15px 20px;
             border-radius: 6px;
             margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .location-header h2 {
             font-size: 1.5rem;
-            margin-bottom: 5px;
+            margin: 0;
         }
 
         .location-header p {
             opacity: 0.9;
             font-size: 0.9rem;
+            margin: 0;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
+            min-width: 600px; /* Ensure table doesn't squish too much on mobile */
         }
 
         thead {
@@ -117,11 +146,13 @@
         }
 
         input[type="number"] {
-            width: 80px;
-            padding: 6px;
+            width: 100%;
+            max-width: 100px;
+            padding: 8px;
             border: 2px solid #ddd;
             border-radius: 4px;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
         }
 
         input[type="number"]:focus {
@@ -136,15 +167,22 @@
 
         .calculated {
             background: #e8f5e9;
-            font-weight: 600;
+            font-weight: 700;
             color: #2e7d32;
+            text-align: center;
+        }
+
+        /* Highlight negative sales or logic errors */
+        .calculated.error {
+            background: #ffebee;
+            color: #c62828;
         }
 
         .summary-section {
             background: white;
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             margin-top: 30px;
         }
 
@@ -158,58 +196,69 @@
 
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
+            margin-bottom: 20px;
         }
 
         .summary-card {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #3498db;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .summary-card h3 {
-            color: #2c3e50;
-            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-size: 0.85rem;
             margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
         .summary-card p {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #3498db;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
         }
 
         .export-btn {
             background: #27ae60;
             color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 20px;
-            margin-right: 10px;
         }
 
         .export-btn:hover {
-            background: #229954;
+            background: #219150;
         }
 
         .save-btn {
             background: #3498db;
             color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-right: 10px;
         }
 
         .save-btn:hover {
@@ -219,81 +268,130 @@
         .clear-btn {
             background: #e74c3c;
             color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-right: 10px;
         }
 
         .clear-btn:hover {
             background: #c0392b;
         }
+        
+        .print-btn {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .print-btn:hover {
+            background: #7f8c8d;
+        }
 
         input[type="number"]:disabled {
-            background: #e8e8e8;
+            background: #e9ecef;
             cursor: not-allowed;
+            color: #7f8c8d;
+            border-color: #ecf0f1;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 9999;
+            transform: translateY(-100px);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
         }
 
         @media print {
-            .export-btn, .save-btn, .clear-btn {
+            .export-btn, .save-btn, .clear-btn, .print-btn {
                 display: none;
             }
+            body {
+                background: white;
+                padding: 0;
+            }
+            .header, .location-section, .summary-section {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
         }
-
+        
         @media (max-width: 768px) {
-            .date-input {
+            .date-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .date-inputs-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .input-group {
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
-            table {
-                font-size: 0.85rem;
+            .input-group input, .input-group select {
+                width: 100%;
             }
-            
-            input[type="number"] {
-                width: 60px;
+            .action-buttons {
+                justify-content: stretch;
+            }
+            .btn {
+                flex: 1;
             }
         }
     </style>
 </head>
-<body>
+<body onload="init()">
+    <div id="toast" class="toast">Action Successful</div>
+
     <div class="header">
-        <h1>Bissinger's Daily Truffle Inventory Tracker</h1>
+        <h1>Bissinger's Daily Truffle Inventory</h1>
+        <p>Track, Calculate, and Export Daily Stock</p>
     </div>
 
     <div class="date-section">
-        <div class="date-input">
-            <label>Date:</label>
-            <input type="date" id="trackingDate" value="">
+        <div class="date-inputs-container">
+            <div class="input-group">
+                <label>Date:</label>
+                <input type="date" id="trackingDate" onchange="saveData()">
+            </div>
             
-            <label style="margin-left: 30px;">Opening MOD:</label>
-            <select id="openingMod" style="padding: 8px 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
-                <option value="">Select MOD</option>
-                <option value="Tom">Tom</option>
-                <option value="Arin">Arin</option>
-                <option value="Czar">Czar</option>
-                <option value="Faith">Faith</option>
-                <option value="Gully">Gully</option>
-                <option value="Associate">Associate</option>
-            </select>
+            <div class="input-group">
+                <label>Opening MOD:</label>
+                <select id="openingMod" onchange="saveData()">
+                    <option value="">Select MOD</option>
+                    <option value="Tom">Tom</option>
+                    <option value="Arin">Arin</option>
+                    <option value="Czar">Czar</option>
+                    <option value="Faith">Faith</option>
+                    <option value="Gully">Gully</option>
+                    <option value="Associate">Associate</option>
+                </select>
+            </div>
             
-            <label style="margin-left: 30px;">Closing MOD:</label>
-            <select id="closingMod" style="padding: 8px 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
-                <option value="">Select MOD</option>
-                <option value="Tom">Tom</option>
-                <option value="Arin">Arin</option>
-                <option value="Czar">Czar</option>
-                <option value="Faith">Faith</option>
-                <option value="Gully">Gully</option>
-                <option value="Associate">Associate</option>
-            </select>
+            <div class="input-group">
+                <label>Closing MOD:</label>
+                <select id="closingMod" onchange="saveData()">
+                    <option value="">Select MOD</option>
+                    <option value="Tom">Tom</option>
+                    <option value="Arin">Arin</option>
+                    <option value="Czar">Czar</option>
+                    <option value="Faith">Faith</option>
+                    <option value="Gully">Gully</option>
+                    <option value="Associate">Associate</option>
+                </select>
+            </div>
         </div>
-        <div style="margin-top: 15px;">
-            <button class="save-btn" id="saveBtn">Save AM Counts</button>
-            <button class="clear-btn" id="clearBtn">Clear All</button>
+        
+        <div class="action-buttons">
+            <button class="btn save-btn" onclick="saveCounts()">Lock AM Counts</button>
+            <button class="btn clear-btn" onclick="clearAll()">Reset All</button>
         </div>
     </div>
 
@@ -348,15 +446,15 @@
         </div>
         <div class="summary-grid">
             <div class="summary-card">
-                <h3>6th Floor Total Sold</h3>
+                <h3>6th Floor Sold</h3>
                 <p id="floor6Total">0</p>
             </div>
             <div class="summary-card">
-                <h3>1st Floor Total Sold</h3>
+                <h3>1st Floor Sold</h3>
                 <p id="floor1Total">0</p>
             </div>
             <div class="summary-card">
-                <h3>Combined Total Sold</h3>
+                <h3>Total Sold</h3>
                 <p id="combinedTotal">0</p>
             </div>
             <div class="summary-card">
@@ -364,224 +462,107 @@
                 <p id="totalRefills">0</p>
             </div>
         </div>
-        <button class="export-btn" id="exportBtn">Export to CSV</button>
-        <button class="export-btn" id="printBtn">Print Report</button>
+        <div class="action-buttons">
+            <button class="btn export-btn" onclick="exportToCSV()">Export CSV</button>
+            <button class="btn print-btn" onclick="window.print()">Print Report</button>
+        </div>
     </div>
 
     <script>
         const floor6Flavors = [
-            "Birthday Cake Truffle",
-            "Wedding Cake Truffle",
-            "Root Beer Float Truffle",
-            "Milk Chocolate Raspberry Cream",
-            "Dark Chocolate Candy Cane",
-            "Dark Raspberry Truffle",
-            "Creme Brulee Truffle",
-            "Tiramisu Truffle",
-            "Pineapple Upside Down Cake Truffle",
-            "Red Velvet Cake Truffle",
-            "Irish Cream Truffle",
-            "Chocolate Souffle Truffle",
-            "White Euro Truffle",
-            "White Russian Truffle",
-            "Chocolate Milk Shake Truffle",
-            "Dark Chocolate Caramel Macchiato Truffle",
-            "German Chocolate Truffle",
-            "Dark Chocolate Cherry Cordials",
-            "Milk Swiss Chocolate Truffle",
-            "Dark Swiss Chocolate Truffle",
-            "Dark Sea Salt Caramel Truffle",
-            "Strawberry Truffle",
-            "Strawberry Cheese Cake Truffle",
-            "Pistachio Crown Truffle",
-            "Italian Espresso Truffle",
-            "Dark Chocolate Caramel",
-            "Fresh Mint Truffle",
-            "Dark Creme Mints",
-            "Milk Sea Salt Caramel",
-            "Dark Cinnamon Almond Caramel",
-            "Milk Chocolate Swiss Pecan Cream",
-            "Milk Vanilla Dreams",
-            "French Vanilla B",
-            "Milk Chocolate English Almond Toffee",
-            "Dark Chocolate English Almond Toffee",
-            "Dark Lemon Creme",
-            "Raspberry Caramel Jewel"
+            "Birthday Cake Truffle", "Wedding Cake Truffle", "Root Beer Float Truffle",
+            "Milk Chocolate Raspberry Cream", "Dark Chocolate Candy Cane", "Dark Raspberry Truffle",
+            "Creme Brulee Truffle", "Tiramisu Truffle", "Pineapple Upside Down Cake Truffle",
+            "Red Velvet Cake Truffle", "Irish Cream Truffle", "Chocolate Souffle Truffle",
+            "White Euro Truffle", "White Russian Truffle", "Chocolate Milk Shake Truffle",
+            "Dark Chocolate Caramel Macchiato Truffle", "German Chocolate Truffle",
+            "Dark Chocolate Cherry Cordials", "Milk Swiss Chocolate Truffle",
+            "Dark Swiss Chocolate Truffle", "Dark Sea Salt Caramel Truffle",
+            "Strawberry Truffle", "Strawberry Cheese Cake Truffle", "Pistachio Crown Truffle",
+            "Italian Espresso Truffle", "Dark Chocolate Caramel", "Fresh Mint Truffle",
+            "Dark Creme Mints", "Milk Sea Salt Caramel", "Dark Cinnamon Almond Caramel",
+            "Milk Chocolate Swiss Pecan Cream", "Milk Vanilla Dreams", "French Vanilla B",
+            "Milk Chocolate English Almond Toffee", "Dark Chocolate English Almond Toffee",
+            "Dark Lemon Creme", "Raspberry Caramel Jewel"
         ];
 
         const floor1Flavors = [
-            "Birthday Cake Truffle",
-            "Wedding Cake Truffle",
-            "White Euro Truffle",
-            "Dark Chocolate Sea Salt Caramel",
-            "White Chocolate Christmas Cookie Truffle",
-            "Dark Chocolate Candy Cane",
-            "White Chocolate Eggnog",
-            "Milk Chocolate Caramel Fudge Brownie",
-            "Milk Chocolate Peanut Butter",
-            "Milk Chocolate French Salt Caramel",
-            "Cherry Cordials",
+            "Birthday Cake Truffle", "Wedding Cake Truffle", "White Euro Truffle",
+            "Dark Chocolate Sea Salt Caramel", "White Chocolate Christmas Cookie Truffle",
+            "Dark Chocolate Candy Cane", "White Chocolate Eggnog",
+            "Milk Chocolate Caramel Fudge Brownie", "Milk Chocolate Peanut Butter",
+            "Milk Chocolate French Salt Caramel", "Cherry Cordials",
             "Milk Chocolate Swiss Pecan Creme"
         ];
 
-        // Auto-save function
-        function saveData() {
-            try {
-                const data = {
-                    date: document.getElementById('trackingDate').value,
-                    openingMod: document.getElementById('openingMod').value,
-                    closingMod: document.getElementById('closingMod').value,
-                    floor6: {},
-                    floor1: {}
-                };
+        // --- Initialization ---
 
-                // Save 6th floor data
-                floor6Flavors.forEach((_, idx) => {
-                    const id = `f6_${idx}`;
-                    const amInput = document.getElementById(`${id}_am`);
-                    const pmInput = document.getElementById(`${id}_pm`);
-                    const refillInput = document.getElementById(`${id}_refill`);
-                    
-                    if (amInput && pmInput && refillInput) {
-                        data.floor6[id] = {
-                            am: amInput.value,
-                            pm: pmInput.value,
-                            refill: refillInput.value,
-                            locked: amInput.disabled
-                        };
-                    }
-                });
-
-                // Save 1st floor data
-                floor1Flavors.forEach((_, idx) => {
-                    const id = `f1_${idx}`;
-                    const amInput = document.getElementById(`${id}_am`);
-                    const pmInput = document.getElementById(`${id}_pm`);
-                    const refillInput = document.getElementById(`${id}_refill`);
-                    
-                    if (amInput && pmInput && refillInput) {
-                        data.floor1[id] = {
-                            am: amInput.value,
-                            pm: pmInput.value,
-                            refill: refillInput.value,
-                            locked: amInput.disabled
-                        };
-                    }
-                });
-
-                // Save to browser storage
-                localStorage.setItem('bissingersTrackerData', JSON.stringify(data));
-                console.log('Data saved successfully');
-            } catch (error) {
-                console.error('Error saving data:', error);
+        function init() {
+            // Set today's date if empty
+            const dateInput = document.getElementById('trackingDate');
+            if (!dateInput.value) {
+                dateInput.valueAsDate = new Date();
             }
+
+            // Generate rows
+            generateRows(floor6Flavors, 'floor6Body', 'f6');
+            generateRows(floor1Flavors, 'floor1Body', 'f1');
+
+            // Load data from local storage
+            loadSavedData();
         }
 
-        // Load saved data
-        function loadSavedData() {
-            try {
-                const savedData = localStorage.getItem('bissingersTrackerData');
-                if (!savedData) {
-                    console.log('No saved data found');
-                    return;
-                }
-
-                const data = JSON.parse(savedData);
-
-                // Restore date and MODs
-                if (data.date) document.getElementById('trackingDate').value = data.date;
-                if (data.openingMod) document.getElementById('openingMod').value = data.openingMod;
-                if (data.closingMod) document.getElementById('closingMod').value = data.closingMod;
-
-                // Wait for rows to be created
-                setTimeout(() => {
-                    // Restore 6th floor data
-                    if (data.floor6) {
-                        Object.keys(data.floor6).forEach(id => {
-                            const item = data.floor6[id];
-                            const amInput = document.getElementById(`${id}_am`);
-                            const pmInput = document.getElementById(`${id}_pm`);
-                            const refillInput = document.getElementById(`${id}_refill`);
-                            
-                            if (amInput) {
-                                amInput.value = item.am || 0;
-                                if (item.locked) amInput.disabled = true;
-                            }
-                            if (pmInput) pmInput.value = item.pm || 0;
-                            if (refillInput) refillInput.value = item.refill || 0;
-                            
-                            calculate(id);
-                        });
-                    }
-
-                    // Restore 1st floor data
-                    if (data.floor1) {
-                        Object.keys(data.floor1).forEach(id => {
-                            const item = data.floor1[id];
-                            const amInput = document.getElementById(`${id}_am`);
-                            const pmInput = document.getElementById(`${id}_pm`);
-                            const refillInput = document.getElementById(`${id}_refill`);
-                            
-                            if (amInput) {
-                                amInput.value = item.am || 0;
-                                if (item.locked) amInput.disabled = true;
-                            }
-                            if (pmInput) pmInput.value = item.pm || 0;
-                            if (refillInput) refillInput.value = item.refill || 0;
-                            
-                            calculate(id);
-                        });
-                    }
-
-                    updateSummary();
-                    
-                    // Show notification
-                    showNotification('✓ Previous data restored', '#27ae60');
-                }, 200);
-            } catch (error) {
-                console.error('Error loading saved data:', error);
-            }
+        function generateRows(flavors, tbodyId, prefix) {
+            const tbody = document.getElementById(tbodyId);
+            flavors.forEach((flavor, idx) => {
+                const id = `${prefix}_${idx}`;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="flavor-name">${flavor}</td>
+                    <td><input type="number" id="${id}_am" min="0" placeholder="0" onchange="calculate('${id}'); saveData();"></td>
+                    <td><input type="number" id="${id}_pm" min="0" placeholder="0" onchange="calculate('${id}'); saveData();"></td>
+                    <td class="calculated" id="${id}_sold">0</td>
+                    <td><input type="number" id="${id}_refill" min="0" placeholder="0" onchange="calculate('${id}'); saveData();"></td>
+                    <td class="calculated" id="${id}_end">0</td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
-        // Show notification
-        function showNotification(message, color) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `position: fixed; top: 20px; right: 20px; background: ${color}; color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 9999; font-weight: 600;`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
-        }
+        // --- Core Logic ---
 
-        // Create row
-        function createRow(flavor, id) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td class="flavor-name">${flavor}</td>
-                <td><input type="number" class="am-input" id="${id}_am" min="0" value="0"></td>
-                <td><input type="number" class="pm-input" id="${id}_pm" min="0" value="0"></td>
-                <td class="calculated" id="${id}_sold">0</td>
-                <td><input type="number" class="refill-input" id="${id}_refill" min="0" value="0"></td>
-                <td class="calculated" id="${id}_end">0</td>
-            `;
-            return row;
-        }
-
-        // Calculate
         function calculate(id) {
-            const am = parseInt(document.getElementById(`${id}_am`).value) || 0;
-            const pm = parseInt(document.getElementById(`${id}_pm`).value) || 0;
-            const refill = parseInt(document.getElementById(`${id}_refill`).value) || 0;
+            const amInput = document.getElementById(`${id}_am`);
+            const pmInput = document.getElementById(`${id}_pm`);
+            const refillInput = document.getElementById(`${id}_refill`);
             
-            const sold = Math.max(0, am - pm);
+            const am = parseInt(amInput.value) || 0;
+            const pm = parseInt(pmInput.value) || 0;
+            const refill = parseInt(refillInput.value) || 0;
+            
+            const soldElement = document.getElementById(`${id}_sold`);
+            const endElement = document.getElementById(`${id}_end`);
+
+            // Logic: Sold = AM - PM. 
+            let sold = am - pm;
+            
+            if (sold < 0) {
+                 soldElement.classList.add('error');
+            } else {
+                 soldElement.classList.remove('error');
+            }
+
+            // End Count logic: Usually PM count + Refill (what's physically there now)
+            // Or is it (AM - Sold) + Refill?
+            // If PM count is the ACTUAL count taken at end of shift, then End Count = PM + Refill
             const endCount = pm + refill;
             
-            document.getElementById(`${id}_sold`).textContent = sold;
-            document.getElementById(`${id}_end`).textContent = endCount;
+            soldElement.textContent = sold;
+            endElement.textContent = endCount;
             
             updateSummary();
         }
 
-        // Update summary
         function updateSummary() {
             let floor6Sold = 0;
             let floor1Sold = 0;
@@ -591,7 +572,7 @@
             floor6Flavors.forEach((_, idx) => {
                 const sold = parseInt(document.getElementById(`f6_${idx}_sold`).textContent) || 0;
                 const refill = parseInt(document.getElementById(`f6_${idx}_refill`).value) || 0;
-                floor6Sold += sold;
+                floor6Sold += sold; 
                 totalRefills += refill;
             });
 
@@ -609,133 +590,195 @@
             document.getElementById('totalRefills').textContent = totalRefills;
         }
 
-        // Initialize
-        document.getElementById('trackingDate').valueAsDate = new Date();
+        // --- Data Persistence ---
 
-        // Generate rows for 6th floor
-        const floor6Body = document.getElementById('floor6Body');
-        floor6Flavors.forEach((flavor, idx) => {
-            const row = createRow(flavor, `f6_${idx}`);
-            floor6Body.appendChild(row);
-        });
+        function saveData() {
+            const data = {
+                date: document.getElementById('trackingDate').value,
+                openingMod: document.getElementById('openingMod').value,
+                closingMod: document.getElementById('closingMod').value,
+                floor6: {},
+                floor1: {}
+            };
 
-        // Generate rows for 1st floor
-        const floor1Body = document.getElementById('floor1Body');
-        floor1Flavors.forEach((flavor, idx) => {
-            const row = createRow(flavor, `f1_${idx}`);
-            floor1Body.appendChild(row);
-        });
-
-        // Load saved data after rows are created
-        setTimeout(() => {
-            loadSavedData();
-        }, 100);
-
-        // Add event listeners to all inputs
-        setTimeout(() => {
-            document.querySelectorAll('input[type="number"]').forEach(input => {
-                input.addEventListener('change', function() {
-                    const id = this.id.replace(/_am|_pm|_refill/, '');
-                    calculate(id);
-                    saveData();
-                });
+            // Save 6th Floor
+            floor6Flavors.forEach((_, idx) => {
+                const id = `f6_${idx}`;
+                data.floor6[id] = {
+                    am: document.getElementById(`${id}_am`).value,
+                    pm: document.getElementById(`${id}_pm`).value,
+                    refill: document.getElementById(`${id}_refill`).value,
+                    locked: document.getElementById(`${id}_am`).disabled
+                };
             });
 
-            // Add listeners to date and MODs
-            document.getElementById('trackingDate').addEventListener('change', saveData);
-            document.getElementById('openingMod').addEventListener('change', saveData);
-            document.getElementById('closingMod').addEventListener('change', saveData);
-        }, 200);
-
-        // Save AM Counts button
-        document.getElementById('saveBtn').addEventListener('click', function() {
-            const allAMInputs = document.querySelectorAll('input[id$="_am"]');
-            allAMInputs.forEach(input => {
-                input.disabled = true;
+            // Save 1st Floor
+            floor1Flavors.forEach((_, idx) => {
+                const id = `f1_${idx}`;
+                data.floor1[id] = {
+                    am: document.getElementById(`${id}_am`).value,
+                    pm: document.getElementById(`${id}_pm`).value,
+                    refill: document.getElementById(`${id}_refill`).value,
+                    locked: document.getElementById(`${id}_am`).disabled
+                };
             });
-            saveData();
-            showNotification('AM counts saved and locked!', '#3498db');
-        });
 
-        // Clear All button
-        document.getElementById('clearBtn').addEventListener('click', function() {
-            if (confirm('Are you sure you want to clear all counts? This will delete all saved data and cannot be undone.')) {
-                // Clear storage
-                localStorage.removeItem('bissingersTrackerData');
-                
-                // Reset all inputs
-                document.querySelectorAll('input[type="number"]').forEach(input => {
-                    input.disabled = false;
-                    input.value = 0;
-                });
-                
-                // Clear dropdowns
-                document.getElementById('openingMod').value = '';
-                document.getElementById('closingMod').value = '';
-                
-                // Clear calculated fields
-                document.querySelectorAll('.calculated').forEach(cell => {
-                    cell.textContent = '0';
-                });
-                
-                updateSummary();
-                showNotification('All data cleared!', '#e74c3c');
+            localStorage.setItem('bissingersTrackerData', JSON.stringify(data));
+        }
+
+        function loadSavedData() {
+            const savedData = localStorage.getItem('bissingersTrackerData');
+            if (!savedData) return;
+
+            try {
+                const data = JSON.parse(savedData);
+
+                if (data.date) document.getElementById('trackingDate').value = data.date;
+                if (data.openingMod) document.getElementById('openingMod').value = data.openingMod;
+                if (data.closingMod) document.getElementById('closingMod').value = data.closingMod;
+
+                // Restore Floor 6
+                if (data.floor6) {
+                    Object.keys(data.floor6).forEach(id => {
+                        const item = data.floor6[id];
+                        const amInput = document.getElementById(`${id}_am`);
+                        if (amInput) {
+                            amInput.value = item.am;
+                            document.getElementById(`${id}_pm`).value = item.pm;
+                            document.getElementById(`${id}_refill`).value = item.refill;
+                            if (item.locked) amInput.disabled = true;
+                            calculate(id);
+                        }
+                    });
+                }
+
+                // Restore Floor 1
+                if (data.floor1) {
+                    Object.keys(data.floor1).forEach(id => {
+                        const item = data.floor1[id];
+                        const amInput = document.getElementById(`${id}_am`);
+                        if (amInput) {
+                            amInput.value = item.am;
+                            document.getElementById(`${id}_pm`).value = item.pm;
+                            document.getElementById(`${id}_refill`).value = item.refill;
+                            if (item.locked) amInput.disabled = true;
+                            calculate(id);
+                        }
+                    });
+                }
+
+                showToast("Data restored from memory");
+            } catch (e) {
+                console.error("Error loading data", e);
             }
-        });
+        }
 
-        // Export to CSV button
-        document.getElementById('exportBtn').addEventListener('click', function() {
+        function saveCounts() {
+            // Locks the AM counts to prevent editing
+            const confirmLock = confirm("Are you sure you want to lock the AM counts? You won't be able to edit them afterwards.");
+            if (!confirmLock) return;
+
+            // Lock Floor 6
+            floor6Flavors.forEach((_, idx) => {
+                const el = document.getElementById(`f6_${idx}_am`);
+                if(el) el.disabled = true;
+            });
+
+            // Lock Floor 1
+            floor1Flavors.forEach((_, idx) => {
+                const el = document.getElementById(`f1_${idx}_am`);
+                if(el) el.disabled = true;
+            });
+
+            saveData(); // Save the locked state
+            showToast("AM Counts Locked");
+        }
+
+        function clearAll() {
+            if(!confirm("Are you sure you want to clear all data? This cannot be undone.")) return;
+
+            // Clear Inputs and unlock
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.value = "";
+                input.disabled = false;
+            });
+
+            // Reset dropdowns
+            document.getElementById('openingMod').value = "";
+            document.getElementById('closingMod').value = "";
+            
+            // Reset totals
+            document.querySelectorAll('.calculated').forEach(el => {
+                el.textContent = "0";
+                el.classList.remove('error');
+            });
+
+            // Clear Local Storage
+            localStorage.removeItem('bissingersTrackerData');
+            
+            // Recalculate to zero out summaries
+            updateSummary();
+            showToast("All data cleared");
+        }
+
+        function exportToCSV() {
             const date = document.getElementById('trackingDate').value;
-            const openingMod = document.getElementById('openingMod').value;
-            const closingMod = document.getElementById('closingMod').value;
+            const openMod = document.getElementById('openingMod').value;
+            const closeMod = document.getElementById('closingMod').value;
             
-            let csv = `Bissinger's Truffle Tracker - ${date}\n`;
-            csv += `Opening MOD: ${openingMod}\n`;
-            csv += `Closing MOD: ${closingMod}\n\n`;
+            let csv = `Bissinger's Truffle Report\n`;
+            csv += `Date,${date}\n`;
+            csv += `Opening MOD,${openMod}\n`;
+            csv += `Closing MOD,${closeMod}\n\n`;
             
-            // 6th Floor Data
-            csv += "6TH FLOOR\n";
-            csv += "Flavor,AM Count,PM Count,Sold,Refill,End Count\n";
+            csv += `6TH FLOOR\n`;
+            csv += `Flavor,AM Count,PM Count,Sold,Refill,End Count\n`;
+            
             floor6Flavors.forEach((flavor, idx) => {
-                const am = document.getElementById(`f6_${idx}_am`).value;
-                const pm = document.getElementById(`f6_${idx}_pm`).value;
+                const am = document.getElementById(`f6_${idx}_am`).value || 0;
+                const pm = document.getElementById(`f6_${idx}_pm`).value || 0;
                 const sold = document.getElementById(`f6_${idx}_sold`).textContent;
-                const refill = document.getElementById(`f6_${idx}_refill`).value;
+                const refill = document.getElementById(`f6_${idx}_refill`).value || 0;
                 const end = document.getElementById(`f6_${idx}_end`).textContent;
-                csv += `${flavor},${am},${pm},${sold},${refill},${end}\n`;
+                csv += `"${flavor}",${am},${pm},${sold},${refill},${end}\n`;
             });
             
-            csv += "\n1ST FLOOR\n";
-            csv += "Flavor,AM Count,PM Count,Sold,Refill,End Count\n";
+            csv += `\n1ST FLOOR\n`;
+            csv += `Flavor,AM Count,PM Count,Sold,Refill,End Count\n`;
+            
             floor1Flavors.forEach((flavor, idx) => {
-                const am = document.getElementById(`f1_${idx}_am`).value;
-                const pm = document.getElementById(`f1_${idx}_pm`).value;
+                const am = document.getElementById(`f1_${idx}_am`).value || 0;
+                const pm = document.getElementById(`f1_${idx}_pm`).value || 0;
                 const sold = document.getElementById(`f1_${idx}_sold`).textContent;
-                const refill = document.getElementById(`f1_${idx}_refill`).value;
+                const refill = document.getElementById(`f1_${idx}_refill`).value || 0;
                 const end = document.getElementById(`f1_${idx}_end`).textContent;
-                csv += `${flavor},${am},${pm},${sold},${refill},${end}\n`;
+                csv += `"${flavor}",${am},${pm},${sold},${refill},${end}\n`;
             });
-
-            csv += `\nSummary\n`;
-            csv += `6th Floor Total Sold,${document.getElementById('floor6Total').textContent}\n`;
-            csv += `1st Floor Total Sold,${document.getElementById('floor1Total').textContent}\n`;
-            csv += `Combined Total Sold,${document.getElementById('combinedTotal').textContent}\n`;
+            
+            csv += `\nSUMMARY\n`;
+            csv += `6th Floor Sold,${document.getElementById('floor6Total').textContent}\n`;
+            csv += `1st Floor Sold,${document.getElementById('floor1Total').textContent}\n`;
+            csv += `Total Sold,${document.getElementById('combinedTotal').textContent}\n`;
             csv += `Total Refills,${document.getElementById('totalRefills').textContent}\n`;
 
-            // Download
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Bissingers_Tracker_${date}.csv`;
+            a.download = `Bissinger_Truffle_Report_${date}.csv`;
             a.click();
             window.URL.revokeObjectURL(url);
-        });
-
-        // Print button
-        document.getElementById('printBtn').addEventListener('click', function() {
-            window.print();
-        });
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
     </script>
 </body>
 </html>
