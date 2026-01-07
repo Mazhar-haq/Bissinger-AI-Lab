@@ -31,10 +31,6 @@
             margin-bottom: 10px;
         }
 
-        .header p {
-            opacity: 0.9;
-        }
-
         .date-section {
             background: white;
             padding: 20px;
@@ -48,6 +44,7 @@
             gap: 15px;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .date-input label {
@@ -212,7 +209,6 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
             margin-right: 10px;
         }
 
@@ -229,7 +225,6 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
             margin-right: 10px;
         }
 
@@ -243,8 +238,23 @@
         }
 
         @media print {
-            .export-btn {
+            .export-btn, .save-btn, .clear-btn {
                 display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .date-input {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            table {
+                font-size: 0.85rem;
+            }
+            
+            input[type="number"] {
+                width: 60px;
             }
         }
     </style>
@@ -282,8 +292,8 @@
             </select>
         </div>
         <div style="margin-top: 15px;">
-            <button class="save-btn" onclick="saveCounts()">Save AM Counts</button>
-            <button class="clear-btn" onclick="clearAll()">Clear All</button>
+            <button class="save-btn" id="saveBtn">Save AM Counts</button>
+            <button class="clear-btn" id="clearBtn">Clear All</button>
         </div>
     </div>
 
@@ -354,12 +364,11 @@
                 <p id="totalRefills">0</p>
             </div>
         </div>
-        <button class="export-btn" onclick="exportToCSV()">Export to CSV</button>
-        <button class="export-btn" onclick="window.print()">Print Report</button>
+        <button class="export-btn" id="exportBtn">Export to CSV</button>
+        <button class="export-btn" id="printBtn">Print Report</button>
     </div>
 
     <script>
-        // Common truffle flavors (you can customize these)
         const floor6Flavors = [
             "Birthday Cake Truffle",
             "Wedding Cake Truffle",
@@ -415,12 +424,68 @@
             "Milk Chocolate Swiss Pecan Creme"
         ];
 
-        // Load saved data from browser storage
-        function loadSavedData() {
-            const savedData = localStorage.getItem('bissingersTrackerData');
-            if (!savedData) return;
-
+        // Auto-save function
+        function saveData() {
             try {
+                const data = {
+                    date: document.getElementById('trackingDate').value,
+                    openingMod: document.getElementById('openingMod').value,
+                    closingMod: document.getElementById('closingMod').value,
+                    floor6: {},
+                    floor1: {}
+                };
+
+                // Save 6th floor data
+                floor6Flavors.forEach((_, idx) => {
+                    const id = `f6_${idx}`;
+                    const amInput = document.getElementById(`${id}_am`);
+                    const pmInput = document.getElementById(`${id}_pm`);
+                    const refillInput = document.getElementById(`${id}_refill`);
+                    
+                    if (amInput && pmInput && refillInput) {
+                        data.floor6[id] = {
+                            am: amInput.value,
+                            pm: pmInput.value,
+                            refill: refillInput.value,
+                            locked: amInput.disabled
+                        };
+                    }
+                });
+
+                // Save 1st floor data
+                floor1Flavors.forEach((_, idx) => {
+                    const id = `f1_${idx}`;
+                    const amInput = document.getElementById(`${id}_am`);
+                    const pmInput = document.getElementById(`${id}_pm`);
+                    const refillInput = document.getElementById(`${id}_refill`);
+                    
+                    if (amInput && pmInput && refillInput) {
+                        data.floor1[id] = {
+                            am: amInput.value,
+                            pm: pmInput.value,
+                            refill: refillInput.value,
+                            locked: amInput.disabled
+                        };
+                    }
+                });
+
+                // Save to browser storage
+                localStorage.setItem('bissingersTrackerData', JSON.stringify(data));
+                console.log('Data saved successfully');
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        }
+
+        // Load saved data
+        function loadSavedData() {
+            try {
+                const savedData = localStorage.getItem('bissingersTrackerData');
+                if (!savedData) {
+                    console.log('No saved data found');
+                    return;
+                }
+
                 const data = JSON.parse(savedData);
 
                 // Restore date and MODs
@@ -428,7 +493,7 @@
                 if (data.openingMod) document.getElementById('openingMod').value = data.openingMod;
                 if (data.closingMod) document.getElementById('closingMod').value = data.closingMod;
 
-                // Wait for rows to be created, then restore data
+                // Wait for rows to be created
                 setTimeout(() => {
                     // Restore 6th floor data
                     if (data.floor6) {
@@ -438,10 +503,12 @@
                             const pmInput = document.getElementById(`${id}_pm`);
                             const refillInput = document.getElementById(`${id}_refill`);
                             
-                            if (amInput) amInput.value = item.am;
-                            if (pmInput) pmInput.value = item.pm;
-                            if (refillInput) refillInput.value = item.refill;
-                            if (amInput && item.locked) amInput.disabled = true;
+                            if (amInput) {
+                                amInput.value = item.am || 0;
+                                if (item.locked) amInput.disabled = true;
+                            }
+                            if (pmInput) pmInput.value = item.pm || 0;
+                            if (refillInput) refillInput.value = item.refill || 0;
                             
                             calculate(id);
                         });
@@ -455,10 +522,12 @@
                             const pmInput = document.getElementById(`${id}_pm`);
                             const refillInput = document.getElementById(`${id}_refill`);
                             
-                            if (amInput) amInput.value = item.am;
-                            if (pmInput) pmInput.value = item.pm;
-                            if (refillInput) refillInput.value = item.refill;
-                            if (amInput && item.locked) amInput.disabled = true;
+                            if (amInput) {
+                                amInput.value = item.am || 0;
+                                if (item.locked) amInput.disabled = true;
+                            }
+                            if (pmInput) pmInput.value = item.pm || 0;
+                            if (refillInput) refillInput.value = item.refill || 0;
                             
                             calculate(id);
                         });
@@ -466,65 +535,53 @@
 
                     updateSummary();
                     
-                    // Show a subtle notification that data was restored
-                    const notification = document.createElement('div');
-                    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #27ae60; color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 9999; font-weight: 600;';
-                    notification.textContent = '✓ Previous data restored';
-                    document.body.appendChild(notification);
-                    setTimeout(() => notification.remove(), 3000);
-                }, 100);
+                    // Show notification
+                    showNotification('✓ Previous data restored', '#27ae60');
+                }, 200);
             } catch (error) {
                 console.error('Error loading saved data:', error);
             }
         }
 
-        // Set today's date
-        document.getElementById('trackingDate').valueAsDate = new Date();
+        // Show notification
+        function showNotification(message, color) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `position: fixed; top: 20px; right: 20px; background: ${color}; color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 9999; font-weight: 600;`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
 
-        // Load saved data from browser storage
-        loadSavedData();
-
-        // Generate rows for 6th floor
-        const floor6Body = document.getElementById('floor6Body');
-        floor6Flavors.forEach((flavor, idx) => {
-            const row = createRow(flavor, `f6_${idx}`);
-            floor6Body.appendChild(row);
-        });
-
-        // Generate rows for 1st floor
-        const floor1Body = document.getElementById('floor1Body');
-        floor1Flavors.forEach((flavor, idx) => {
-            const row = createRow(flavor, `f1_${idx}`);
-            floor1Body.appendChild(row);
-        });
-
+        // Create row
         function createRow(flavor, id) {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="flavor-name">${flavor}</td>
-                <td><input type="number" id="${id}_am" min="0" value="0" onchange="calculate('${id}'); saveData();"></td>
-                <td><input type="number" id="${id}_pm" min="0" value="0" onchange="calculate('${id}'); saveData();"></td>
+                <td><input type="number" class="am-input" id="${id}_am" min="0" value="0"></td>
+                <td><input type="number" class="pm-input" id="${id}_pm" min="0" value="0"></td>
                 <td class="calculated" id="${id}_sold">0</td>
-                <td><input type="number" id="${id}_refill" min="0" value="0" onchange="calculate('${id}'); saveData();"></td>
+                <td><input type="number" class="refill-input" id="${id}_refill" min="0" value="0"></td>
                 <td class="calculated" id="${id}_end">0</td>
             `;
             return row;
         }
 
+        // Calculate
         function calculate(id) {
             const am = parseInt(document.getElementById(`${id}_am`).value) || 0;
             const pm = parseInt(document.getElementById(`${id}_pm`).value) || 0;
             const refill = parseInt(document.getElementById(`${id}_refill`).value) || 0;
             
-            const sold = am - pm;
+            const sold = Math.max(0, am - pm);
             const endCount = pm + refill;
             
-            document.getElementById(`${id}_sold`).textContent = sold >= 0 ? sold : 0;
+            document.getElementById(`${id}_sold`).textContent = sold;
             document.getElementById(`${id}_end`).textContent = endCount;
             
             updateSummary();
         }
 
+        // Update summary
         function updateSummary() {
             let floor6Sold = 0;
             let floor1Sold = 0;
@@ -552,9 +609,89 @@
             document.getElementById('totalRefills').textContent = totalRefills;
         }
 
-        function exportToCSV() {
+        // Initialize
+        document.getElementById('trackingDate').valueAsDate = new Date();
+
+        // Generate rows for 6th floor
+        const floor6Body = document.getElementById('floor6Body');
+        floor6Flavors.forEach((flavor, idx) => {
+            const row = createRow(flavor, `f6_${idx}`);
+            floor6Body.appendChild(row);
+        });
+
+        // Generate rows for 1st floor
+        const floor1Body = document.getElementById('floor1Body');
+        floor1Flavors.forEach((flavor, idx) => {
+            const row = createRow(flavor, `f1_${idx}`);
+            floor1Body.appendChild(row);
+        });
+
+        // Load saved data after rows are created
+        setTimeout(() => {
+            loadSavedData();
+        }, 100);
+
+        // Add event listeners to all inputs
+        setTimeout(() => {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    const id = this.id.replace(/_am|_pm|_refill/, '');
+                    calculate(id);
+                    saveData();
+                });
+            });
+
+            // Add listeners to date and MODs
+            document.getElementById('trackingDate').addEventListener('change', saveData);
+            document.getElementById('openingMod').addEventListener('change', saveData);
+            document.getElementById('closingMod').addEventListener('change', saveData);
+        }, 200);
+
+        // Save AM Counts button
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            const allAMInputs = document.querySelectorAll('input[id$="_am"]');
+            allAMInputs.forEach(input => {
+                input.disabled = true;
+            });
+            saveData();
+            showNotification('AM counts saved and locked!', '#3498db');
+        });
+
+        // Clear All button
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all counts? This will delete all saved data and cannot be undone.')) {
+                // Clear storage
+                localStorage.removeItem('bissingersTrackerData');
+                
+                // Reset all inputs
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.disabled = false;
+                    input.value = 0;
+                });
+                
+                // Clear dropdowns
+                document.getElementById('openingMod').value = '';
+                document.getElementById('closingMod').value = '';
+                
+                // Clear calculated fields
+                document.querySelectorAll('.calculated').forEach(cell => {
+                    cell.textContent = '0';
+                });
+                
+                updateSummary();
+                showNotification('All data cleared!', '#e74c3c');
+            }
+        });
+
+        // Export to CSV button
+        document.getElementById('exportBtn').addEventListener('click', function() {
             const date = document.getElementById('trackingDate').value;
-            let csv = `Bissinger's Truffle Tracker - ${date}\n\n`;
+            const openingMod = document.getElementById('openingMod').value;
+            const closingMod = document.getElementById('closingMod').value;
+            
+            let csv = `Bissinger's Truffle Tracker - ${date}\n`;
+            csv += `Opening MOD: ${openingMod}\n`;
+            csv += `Closing MOD: ${closingMod}\n\n`;
             
             // 6th Floor Data
             csv += "6TH FLOOR\n";
@@ -579,6 +716,12 @@
                 csv += `${flavor},${am},${pm},${sold},${refill},${end}\n`;
             });
 
+            csv += `\nSummary\n`;
+            csv += `6th Floor Total Sold,${document.getElementById('floor6Total').textContent}\n`;
+            csv += `1st Floor Total Sold,${document.getElementById('floor1Total').textContent}\n`;
+            csv += `Combined Total Sold,${document.getElementById('combinedTotal').textContent}\n`;
+            csv += `Total Refills,${document.getElementById('totalRefills').textContent}\n`;
+
             // Download
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
@@ -586,7 +729,13 @@
             a.href = url;
             a.download = `Bissingers_Tracker_${date}.csv`;
             a.click();
-        }
+            window.URL.revokeObjectURL(url);
+        });
+
+        // Print button
+        document.getElementById('printBtn').addEventListener('click', function() {
+            window.print();
+        });
     </script>
 </body>
 </html>
