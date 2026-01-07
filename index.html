@@ -102,7 +102,6 @@
             border: 1px solid #eee;
         }
 
-        /* QUICK REFILL BUTTONS */
         .refill-cell {
             display: flex;
             flex-direction: column;
@@ -222,7 +221,7 @@
         <div style="display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap;">
             <button class="tab-btn" style="background:#eee; color:#333; flex:1; min-width: 70px;" onclick="clearAll()">Reset</button>
             <button class="tab-btn active" style="flex:2; min-width: 140px;" onclick="lockAM()">Lock AM</button>
-            <button class="btn-copy" style="flex: 1.5; min-width: 130px;" onclick="copyTextReport()">📋 Copy Text Report</button>
+            <button class="btn-copy" style="flex: 1.5; min-width: 130px;" onclick="copyAMTextReport()">📋 Am text report</button>
             <button class="btn-export" style="flex: 1; min-width: 110px;" onclick="exportCSV()">Export CSV</button>
         </div>
     </div>
@@ -277,15 +276,15 @@
     <!-- Summary Footer -->
     <div class="summary-footer">
         <div class="summary-item">
-            <span class="summary-label">6th Floor Sold</span>
+            <span class="summary-label">6th Floor Count</span>
             <span class="summary-val" id="total-f6">0</span>
         </div>
         <div class="summary-item">
-            <span class="summary-label">Total Sold</span>
+            <span class="summary-label">Total Count</span>
             <span class="summary-val" id="total-grand" style="color: white; border-bottom: 2px solid var(--bissingers-gold);">0</span>
         </div>
         <div class="summary-item">
-            <span class="summary-label">1st Floor Sold</span>
+            <span class="summary-label">1st Floor Count</span>
             <span class="summary-val" id="total-f1">0</span>
         </div>
     </div>
@@ -311,12 +310,13 @@
         
         const f1List = [
             "Birthday Cake Truffle", "Wedding Cake Truffle", "White Euro Truffle", 
-            "Dark Chocolate Sea Salt Caramel", "White Chocolate Christmas Cookie Truffle", 
+            "Dark Chocolate Sea Salt Caramel", 
+            "Tiramisu Truffle",
+            "White Chocolate Christmas Cookie Truffle", 
             "Dark Chocolate Candy Cane", "White Chocolate Eggnog", 
             "Milk Chocolate Caramel Fudge Brownie", "Milk Chocolate Peanut Butter", 
             "Milk Chocolate French Salt Caramel", 
-            "Milk Chocolate Swiss Pecan Creme",
-            "Tiramisu Truffle"
+            "Milk Chocolate Swiss Pecan Creme"
         ];
 
         let currentFloor = 'f6';
@@ -362,34 +362,47 @@
         }
 
         function calc(id) {
-            const am = parseInt(document.getElementById(`${id}_am`).value) || 0;
-            const pm = parseInt(document.getElementById(`${id}_pm`).value) || 0;
-            const refill = parseInt(document.getElementById(`${id}_refill`).value) || 0;
+            const amVal = document.getElementById(`${id}_am`).value;
+            const pmVal = document.getElementById(`${id}_pm`).value;
+            const refillVal = document.getElementById(`${id}_refill`).value;
+
+            const am = parseInt(amVal) || 0;
+            const pm = parseInt(pmVal) || 0;
+            const refill = parseInt(refillVal) || 0;
             
+            // End count is always calculated
             const end = pm + refill;
             const endEl = document.getElementById(`${id}_end`);
             endEl.textContent = end;
 
+            // Low stock warning
             if (end > 0 && end < 5) {
                 endEl.classList.add('low-stock');
             } else {
                 endEl.classList.remove('low-stock');
             }
 
-            const sold = Math.max(0, (am + refill) - pm);
-            document.getElementById(`${id}_sold`).textContent = sold;
+            // Sold only updates if PM count has a value
+            const soldEl = document.getElementById(`${id}_sold`);
+            if (pmVal !== "") {
+                const sold = Math.max(0, (am + refill) - pm);
+                soldEl.textContent = sold;
+            } else {
+                soldEl.textContent = "0";
+            }
 
             updateTotals();
             saveData();
         }
 
         function updateTotals() {
-            const sumSold = (prefix, list) => list.reduce((acc, _, i) => {
-                return acc + (parseInt(document.getElementById(`${prefix}_${i}_sold`).textContent) || 0);
+            const sumEnd = (prefix, list) => list.reduce((acc, _, i) => {
+                const val = parseInt(document.getElementById(`${prefix}_${i}_end`).textContent) || 0;
+                return acc + val;
             }, 0);
 
-            const f6Total = sumSold('f6', f6List);
-            const f1Total = sumSold('f1', f1List);
+            const f6Total = sumEnd('f6', f6List);
+            const f1Total = sumEnd('f1', f1List);
 
             document.getElementById('total-f6').textContent = f6Total;
             document.getElementById('total-f1').textContent = f1Total;
@@ -436,8 +449,10 @@
             document.getElementById('openingMod').value = data.oMod || '';
             document.getElementById('closingMod').value = data.cMod || '';
             updateDateDisplay();
-            const unpack = (p, items) => items.forEach((item, i) => {
-                const id = `${p}_${i}`;
+            
+            // Unpack 6th Floor
+            data.f6.forEach((item, i) => {
+                const id = `f6_${i}`;
                 if (!document.getElementById(`${id}_am`)) return;
                 document.getElementById(`${id}_am`).value = item.am;
                 document.getElementById(`${id}_pm`).value = item.pm;
@@ -445,8 +460,19 @@
                 if (item.l) document.getElementById(`${id}_am`).disabled = true;
                 calc(id);
             });
-            unpack('f6', data.f6);
-            unpack('f1', data.f1);
+
+            // Unpack 1st Floor
+            data.f1.forEach((item, i) => {
+                const id = `f1_${i}`;
+                if (!document.getElementById(`${id}_am`)) return;
+                document.getElementById(`${id}_am`).value = item.am;
+                document.getElementById(`${id}_pm`).value = item.pm;
+                document.getElementById(`${id}_refill`).value = item.ref;
+                if (item.l) document.getElementById(`${id}_am`).disabled = true;
+                calc(id);
+            });
+            
+            updateTotals();
         }
 
         function lockAM() {
@@ -463,38 +489,27 @@
             setTimeout(() => t.style.opacity = 0, 2500);
         }
 
-        function copyTextReport() {
+        function copyAMTextReport() {
             const date = document.getElementById('displayDate').textContent;
             const oMod = document.getElementById('openingMod').value || "N/A";
-            const cMod = document.getElementById('closingMod').value || "N/A";
             
-            let report = `BISSINGER'S TRUFFLE REPORT\nDate: ${date}\nOpening MOD: ${oMod}\nClosing MOD: ${cMod}\n\n`;
+            let report = `BISSINGER'S AM TRUFFLE REPORT\nDate: ${date}\nOpening MOD: ${oMod}\n\n`;
             
             const addSection = (title, list, prefix) => {
-                report += `--- ${title.toUpperCase()} FLOOR ---\n`;
-                let sectionTotal = 0;
+                report += `--- ${title.toUpperCase()} FLOOR AM COUNTS ---\n`;
                 list.forEach((name, i) => {
                     const id = `${prefix}_${i}`;
                     const am = document.getElementById(`${id}_am`).value || 0;
-                    const pm = document.getElementById(`${id}_pm`).value || 0;
-                    const refill = document.getElementById(`${id}_refill`).value || 0;
-                    const sold = document.getElementById(`${id}_sold`).textContent;
-                    const end = document.getElementById(`${id}_end`).textContent;
-                    
-                    if (parseInt(sold) > 0 || parseInt(am) > 0 || parseInt(refill) > 0) {
-                        report += `${name}: Sold ${sold} | End Count ${end}\n`;
-                        sectionTotal += parseInt(sold);
+                    if (parseInt(am) > 0) {
+                        report += `${name}: ${am}\n`;
                     }
                 });
-                report += `Floor Total Sold: ${sectionTotal}\n\n`;
+                report += `\n`;
             };
 
             addSection("6th", f6List, "f6");
             addSection("1st", f1List, "f1");
             
-            const grandTotal = document.getElementById('total-grand').textContent;
-            report += `GRAND TOTAL SOLD: ${grandTotal}\n`;
-
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = report;
@@ -502,7 +517,7 @@
             document.execCommand("copy");
             document.body.removeChild(dummy);
             
-            showToast("Report copied to clipboard!");
+            showToast("AM report copied to clipboard!");
         }
 
         function exportCSV() {
