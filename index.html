@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bissinger's Truffle Tracker</title>
+    <title>Bissinger's Herald Square | Truffle Tracker</title>
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --accent: #8e44ad;
-            --success: #27ae60;
-            --danger: #e74c3c;
-            --light: #f5f5f5;
+            --bissingers-brown: #3d2b1f; /* Signature Bissinger's Brown */
+            --bissingers-gold: #c5a059;  /* Elegant Gold Accent */
+            --bissingers-cream: #f9f6f2;
+            --primary: var(--bissingers-brown);
+            --secondary: #5d4037;
+            --accent: var(--bissingers-gold);
+            --success: #4a6741;
+            --danger: #9e2a2b;
+            --light: #f4eee8;
             --white: #ffffff;
         }
 
@@ -22,34 +25,47 @@
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
             padding: 15px;
             background: var(--light);
-            color: #333;
+            color: var(--bissingers-brown);
             line-height: 1.5;
         }
 
         /* Header Styling */
         .header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 25px 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            background: var(--bissingers-brown);
+            color: var(--bissingers-gold);
+            padding: 30px 15px;
+            border-radius: 4px; /* Slightly sharper, more professional edges */
+            margin-bottom: 25px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-bottom: 3px solid var(--bissingers-gold);
         }
 
-        .header h1 { font-size: 1.75rem; margin-bottom: 5px; }
-        .header p { opacity: 0.9; font-size: 0.9rem; }
+        .header h1 { 
+            font-size: 1.8rem; 
+            margin-bottom: 5px; 
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+        .header p { 
+            opacity: 0.9; 
+            font-size: 0.9rem; 
+            font-style: italic;
+            color: var(--white);
+        }
 
         /* Inputs & Controls */
         .card {
             background: var(--white);
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 4px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(61, 43, 31, 0.1);
+            border: 1px solid rgba(197, 160, 89, 0.2);
         }
 
         .date-grid {
@@ -66,21 +82,23 @@
         }
 
         .input-group label {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--bissingers-brown);
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         input, select {
             padding: 10px;
-            border: 2px solid #eee;
-            border-radius: 6px;
+            border: 1px solid #dcdcdc;
+            border-radius: 2px;
             font-size: 1rem;
             width: 100%;
+            color: var(--bissingers-brown);
         }
 
-        input:focus { outline: none; border-color: var(--secondary); }
+        input:focus { outline: none; border-color: var(--bissingers-gold); }
 
         /* Search Bar */
         .search-wrapper {
@@ -90,8 +108,9 @@
 
         .search-wrapper input {
             padding-left: 35px;
-            border-radius: 25px;
-            background: #f9f9f9;
+            border-radius: 20px;
+            background: var(--bissingers-cream);
+            border: 1px solid #e0dcd8;
         }
 
         .search-icon {
@@ -99,14 +118,13 @@
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            opacity: 0.5;
+            opacity: 0.6;
         }
 
         /* Table Desktop Styles */
         .table-container {
             overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid #eee;
+            border-radius: 4px;
         }
 
         table {
@@ -116,15 +134,21 @@
         }
 
         thead {
-            background: var(--primary);
-            color: white;
+            background: var(--bissingers-brown);
+            color: var(--bissingers-gold);
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
-        th { padding: 12px; text-align: left; font-size: 0.85rem; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
+        th { 
+            padding: 12px; 
+            text-align: left; 
+            font-size: 0.8rem; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
 
         /* Mobile Card View Transformation */
         @media (max-width: 768px) {
@@ -133,12 +157,11 @@
             thead tr { position: absolute; top: -9999px; left: -9999px; }
 
             tr {
-                border: 1px solid #eee;
+                border: 1px solid #e0dcd8;
                 margin-bottom: 15px;
-                border-radius: 8px;
+                border-radius: 4px;
                 background: white;
                 padding: 10px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
 
             td {
@@ -150,6 +173,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
+                font-size: 0.95rem;
             }
 
             td:before {
@@ -161,33 +185,37 @@
                 white-space: nowrap;
                 text-align: left;
                 font-weight: bold;
-                color: var(--primary);
-                font-size: 0.8rem;
+                color: var(--bissingers-brown);
+                font-size: 0.75rem;
+                text-transform: uppercase;
             }
 
             td.flavor-name {
-                background: #f8f9fa;
+                background: var(--bissingers-cream);
                 display: block;
-                text-align: left;
-                padding: 10px;
+                text-align: center;
+                padding: 12px;
                 font-weight: bold;
-                font-size: 1.1rem;
-                border-radius: 4px;
+                font-size: 1rem;
+                border-radius: 2px;
                 margin-bottom: 10px;
                 padding-left: 10px;
+                color: var(--bissingers-brown);
+                border-bottom: 2px solid var(--bissingers-gold);
             }
 
             td.flavor-name:before { content: ""; }
             
             input[type="number"] {
-                max-width: 120px !important;
+                max-width: 100px !important;
                 text-align: center;
+                border-color: #ddd;
             }
         }
 
         /* Helpers */
-        .calculated { font-weight: bold; color: var(--success); }
-        .error { color: var(--danger); }
+        .calculated { font-weight: bold; color: var(--bissingers-brown); }
+        .error { color: var(--danger); font-weight: bold; }
         
         .btn-group {
             display: grid;
@@ -197,24 +225,27 @@
         }
 
         .btn {
-            border: none;
+            border: 1px solid transparent;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 2px;
             font-weight: bold;
             cursor: pointer;
             color: white;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
         }
 
-        .btn:hover { opacity: 0.9; }
-        .btn-save { background: var(--secondary); }
-        .btn-clear { background: var(--danger); }
-        .btn-export { background: var(--success); }
-        .btn-copy { background: var(--accent); }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-save { background: var(--bissingers-brown); border-color: var(--bissingers-gold); color: var(--bissingers-gold); }
+        .btn-clear { background: #f8f8f8; color: #666; border: 1px solid #ddd; }
+        .btn-export { background: var(--bissingers-brown); color: var(--white); }
+        .btn-copy { background: var(--bissingers-gold); color: var(--bissingers-brown); }
 
         .summary-grid {
             display: grid;
@@ -223,28 +254,31 @@
         }
 
         .summary-item {
-            background: #f8f9fa;
+            background: var(--bissingers-cream);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 2px;
             text-align: center;
+            border: 1px solid #ece8e4;
         }
 
-        .summary-val { font-size: 1.5rem; font-weight: 800; display: block; color: var(--primary); }
-        .summary-lbl { font-size: 0.7rem; text-transform: uppercase; color: #666; }
+        .summary-val { font-size: 1.5rem; font-weight: 800; display: block; color: var(--bissingers-brown); }
+        .summary-lbl { font-size: 0.65rem; text-transform: uppercase; color: #8a7364; letter-spacing: 1px; }
 
         .toast {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
+            background: var(--bissingers-brown);
+            color: var(--bissingers-gold);
+            padding: 12px 24px;
+            border-radius: 4px;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
             z-index: 1000;
+            border: 1px solid var(--bissingers-gold);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         @media print {
@@ -257,8 +291,8 @@
     <div id="toast" class="toast">Data Saved</div>
 
     <div class="header">
-        <h1>Bissinger's Tracker</h1>
-        <p id="displayDate"></p>
+        <h1>Bissinger's Herald Square</h1>
+        <p id="displayDate">6th Floor & 1st Floor Inventory</p>
     </div>
 
     <div class="card">
@@ -293,10 +327,10 @@
     <!-- 6th Floor -->
     <div class="card">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-            <h2 style="font-size: 1.2rem;">6th Floor Stock</h2>
+            <h2 style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; color: var(--bissingers-brown);">6th Floor Selection</h2>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" placeholder="Filter flavors..." onkeyup="filterList(this, 'floor6Body')">
+                <input type="text" placeholder="Filter truffles..." onkeyup="filterList(this, 'floor6Body')">
             </div>
         </div>
         <div class="table-container">
@@ -319,10 +353,10 @@
     <!-- 1st Floor -->
     <div class="card">
         <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-            <h2 style="font-size: 1.2rem;">1st Floor Stock</h2>
+            <h2 style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; color: var(--bissingers-brown);">1st Floor Quick Pick</h2>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" placeholder="Filter flavors..." onkeyup="filterList(this, 'floor1Body')">
+                <input type="text" placeholder="Filter truffles..." onkeyup="filterList(this, 'floor1Body')">
             </div>
         </div>
         <div class="table-container">
@@ -344,16 +378,16 @@
 
     <!-- Summary -->
     <div class="card">
-        <h2 style="margin-bottom: 15px; font-size: 1.2rem;">Daily Summary</h2>
+        <h2 style="margin-bottom: 15px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">Shift Summary</h2>
         <div class="summary-grid">
             <div class="summary-item"><span class="summary-val" id="f6Total">0</span><span class="summary-lbl">6th Sold</span></div>
             <div class="summary-item"><span class="summary-val" id="f1Total">0</span><span class="summary-lbl">1st Sold</span></div>
-            <div class="summary-item"><span class="summary-val" id="combinedTotal">0</span><span class="summary-lbl">Total Sold</span></div>
-            <div class="summary-item"><span class="summary-val" id="refillTotal">0</span><span class="summary-lbl">Total Refill</span></div>
+            <div class="summary-item"><span class="summary-val" id="combinedTotal">0</span><span class="summary-lbl">Total Sales</span></div>
+            <div class="summary-item"><span class="summary-val" id="refillTotal">0</span><span class="summary-lbl">Total Refills</span></div>
         </div>
         <div class="btn-group">
-            <button class="btn btn-export" onclick="exportCSV()">Download CSV</button>
-            <button class="btn btn-copy" onclick="copySummary()">Copy Summary</button>
+            <button class="btn btn-export" onclick="exportCSV()">Export CSV</button>
+            <button class="btn btn-copy" onclick="copySummary()">Copy for Group</button>
         </div>
     </div>
 
@@ -466,14 +500,14 @@
         }
 
         function lockAM() {
-            if (!confirm("Lock morning counts? This prevents editing for the rest of the shift.")) return;
+            if (!confirm("Lock morning counts?")) return;
             document.querySelectorAll('input[id$="_am"]').forEach(el => el.disabled = true);
             saveData();
-            showToast("AM Counts Locked");
+            showToast("Morning Counts Locked");
         }
 
         function clearAll() {
-            if (!confirm("Clear everything? This resets the whole form.")) return;
+            if (!confirm("Reset all data?")) return;
             localStorage.clear();
             location.reload();
         }
@@ -497,7 +531,10 @@
         function copySummary() {
             const date = document.getElementById('displayDate').textContent;
             const total = document.getElementById('combinedTotal').textContent;
-            const text = `Truffle Inventory: ${date}\nTotal Sold: ${total}\n6th Floor: ${document.getElementById('f6Total').textContent}\n1st Floor: ${document.getElementById('f1Total').textContent}`;
+            const openMod = document.getElementById('openingMod').value || "N/A";
+            const closeMod = document.getElementById('closingMod').value || "N/A";
+            
+            const text = `Bissinger's Macy's Herald Square\nInventory Summary: ${date}\n------------------\nOpening MOD: ${openMod}\nClosing MOD: ${closeMod}\n------------------\nTotal Sold: ${total}\n6th Floor: ${document.getElementById('f6Total').textContent}\n1st Floor: ${document.getElementById('f1Total').textContent}\nRefills Added: ${document.getElementById('refillTotal').textContent}`;
             
             const el = document.createElement('textarea');
             el.value = text;
@@ -505,7 +542,7 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            showToast("Summary Copied!");
+            showToast("Summary Copied to Clipboard");
         }
 
         function exportCSV() {
@@ -520,7 +557,7 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Truffles_${document.getElementById('trackingDate').value}.csv`;
+            a.download = `Bissingers_Inventory_${document.getElementById('trackingDate').value}.csv`;
             a.click();
         }
 
@@ -528,7 +565,7 @@
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.style.opacity = 1;
-            setTimeout(() => t.style.opacity = 0, 2000);
+            setTimeout(() => t.style.opacity = 0, 2500);
         }
     </script>
 </body>
