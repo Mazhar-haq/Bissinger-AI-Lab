@@ -14,6 +14,7 @@
             --accent: var(--bissingers-gold);
             --success: #4a6741;
             --danger: #9e2a2b;
+            --info: #2c3e50;
             --light: #f4eee8;
             --white: #ffffff;
         }
@@ -22,31 +23,42 @@
 
         body {
             font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
-            padding: 15px;
+            padding: 10px;
             background: var(--light);
             color: var(--bissingers-brown);
             line-height: 1.5;
+            padding-bottom: 100px; /* Space for summary footer */
         }
 
         .header {
             background: var(--bissingers-brown);
             color: var(--bissingers-gold);
-            padding: 25px 15px;
+            padding: 20px 10px;
             border-radius: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             border-bottom: 3px solid var(--bissingers-gold);
         }
 
-        .header h1 { font-size: 1.6rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 300; }
+        .header h1 { font-size: 1.4rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 300; }
 
-        .floor-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        /* STICKY TABS */
+        .floor-tabs { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 15px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            background: var(--light); 
+            padding: 10px 0;
+        }
 
         .tab-btn {
-            flex: 1; padding: 15px; background: #e0dcd8; border: none; border-radius: 4px;
+            flex: 1; padding: 12px; background: #e0dcd8; border: none; border-radius: 4px;
             font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
-            color: #666; transition: all 0.3s;
+            color: #666; transition: all 0.3s; font-size: 0.8rem;
         }
 
         .tab-btn.active { background: var(--bissingers-brown); color: var(--bissingers-gold); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
@@ -55,60 +67,124 @@
         .floor-view.active { display: block; }
 
         .card {
-            background: var(--white); padding: 20px; border-radius: 4px; margin-bottom: 20px;
+            background: var(--white); padding: 15px; border-radius: 4px; margin-bottom: 15px;
             box-shadow: 0 2px 8px rgba(61, 43, 31, 0.1); border: 1px solid rgba(197, 160, 89, 0.2);
         }
 
         .input-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 15px;
+            gap: 12px;
         }
 
         @media (min-width: 600px) {
             .input-grid { grid-template-columns: repeat(3, 1fr); }
+            body { padding: 20px; }
         }
 
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-        input, select { padding: 10px; border: 1px solid #dcdcdc; border-radius: 2px; width: 100%; font-size: 1rem; }
+        .input-group { display: flex; flex-direction: column; gap: 4px; }
+        .input-group label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        input, select { padding: 10px; border: 1px solid #dcdcdc; border-radius: 2px; width: 100%; font-size: 0.95rem; }
 
-        .scanner-section {
-            background: var(--bissingers-cream); border: 2px dashed var(--bissingers-gold);
-            padding: 20px; text-align: center; margin-bottom: 20px; border-radius: 4px;
-        }
-
-        .loading-spinner {
-            display: none; margin: 10px auto; border: 4px solid rgba(0,0,0,0.1);
-            width: 24px; height: 24px; border-radius: 50%; border-left-color: var(--bissingers-gold);
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
+        .table-container { overflow-x: auto; margin: 0 -5px; }
+        table { width: 100%; border-collapse: collapse; min-width: 450px; }
         thead { background: var(--bissingers-brown); color: var(--bissingers-gold); }
-        th { padding: 12px; text-align: left; font-size: 0.7rem; text-transform: uppercase; }
-        td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
+        th { padding: 8px 4px; text-align: center; font-size: 0.6rem; text-transform: uppercase; }
+        th:first-child { text-align: left; padding-left: 10px; }
+        td { padding: 8px 4px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        td:first-child { text-align: left; padding-left: 10px; font-size: 0.8rem; font-weight: 600; }
 
-        .btn-row-scan {
-            background: var(--bissingers-gold); color: var(--bissingers-brown);
-            border: 1px solid var(--bissingers-brown); padding: 6px 10px; border-radius: 4px;
-            font-size: 10px; cursor: pointer; text-transform: uppercase;
+        .count-input {
+            width: 50px;
+            text-align: center;
+            padding: 6px 2px;
+            font-size: 0.9rem;
+            border: 1px solid #eee;
         }
 
-        .pm-cell { display: flex; align-items: center; gap: 5px; }
-        .pm-cell input { width: 60px; }
+        /* QUICK REFILL BUTTONS */
+        .refill-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .quick-btns {
+            display: flex;
+            gap: 2px;
+        }
+        .q-btn {
+            background: var(--bissingers-gold);
+            border: none;
+            color: var(--bissingers-brown);
+            font-size: 0.6rem;
+            padding: 2px 4px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-        .calculated { font-weight: bold; }
-        .error { color: var(--danger); }
-        
-        .btn-ai { background: var(--bissingers-gold); color: var(--bissingers-brown); width: 100%; padding: 15px; border: 1px solid var(--bissingers-brown); font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .calculated { font-weight: bold; font-size: 0.9rem; color: var(--bissingers-brown); }
+        .sold-text { color: var(--success); font-weight: bold; }
+        .low-stock { color: var(--danger) !important; animation: pulse 2s infinite; }
 
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 12px 24px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; z-index: 1000; pointer-events: none; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
 
-        @media (max-width: 600px) {
-            th:nth-child(4), td:nth-child(4) { display: none; }
+        /* SUMMARY FOOTER */
+        .summary-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bissingers-brown);
+            color: var(--bissingers-gold);
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .summary-item { text-align: center; }
+        .summary-label { font-size: 0.65rem; text-transform: uppercase; display: block; }
+        .summary-val { font-size: 1.2rem; font-weight: bold; }
+
+        .btn-export {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .btn-copy {
+            background: var(--info);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 12px 24px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; z-index: 1001; pointer-events: none; white-space: nowrap; }
+
+        @media (max-width: 400px) {
+            th { font-size: 0.55rem; }
+            .count-input { width: 45px; font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -143,9 +219,11 @@
                 </select>
             </div>
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button class="tab-btn" style="background:#eee; color:#333; flex:1;" onclick="clearAll()">Reset</button>
-            <button class="tab-btn active" style="flex:2;" onclick="lockAM()">Lock AM Counts</button>
+        <div style="display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap;">
+            <button class="tab-btn" style="background:#eee; color:#333; flex:1; min-width: 70px;" onclick="clearAll()">Reset</button>
+            <button class="tab-btn active" style="flex:2; min-width: 140px;" onclick="lockAM()">Lock AM</button>
+            <button class="btn-copy" style="flex: 1.5; min-width: 130px;" onclick="copyTextReport()">📋 Copy Text Report</button>
+            <button class="btn-export" style="flex: 1; min-width: 110px;" onclick="exportCSV()">Export CSV</button>
         </div>
     </div>
 
@@ -154,19 +232,21 @@
         <button class="tab-btn" id="btn-f1" onclick="switchFloor('f1')">1st Floor</button>
     </div>
 
-    <input type="file" id="globalCamera" accept="image/*" capture="environment" style="display: none;" onchange="handleBatchUpload(event)">
-    <input type="file" id="rowCamera" accept="image/*" capture="environment" style="display: none;" onchange="handleRowUpload(event)">
-
     <!-- 6th Floor -->
     <div id="f6-view" class="floor-view active">
-        <div class="card scanner-section">
-            <div class="loading-spinner" id="loader-f6"></div>
-            <button class="btn-ai" onclick="document.getElementById('globalCamera').click()">📷 Scan Whole Case</button>
-        </div>
-        <div class="card">
+        <div class="card" style="padding: 10px;">
             <div class="table-container">
                 <table>
-                    <thead><tr><th>Flavor</th><th>AM</th><th>PM</th><th>Refill</th><th>End</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th style="width: 35%;">Flavor</th>
+                            <th>AM</th>
+                            <th>PM</th>
+                            <th>Refill</th>
+                            <th>Sold</th>
+                            <th>End</th>
+                        </tr>
+                    </thead>
                     <tbody id="f6Body"></tbody>
                 </table>
             </div>
@@ -175,27 +255,70 @@
 
     <!-- 1st Floor -->
     <div id="f1-view" class="floor-view">
-        <div class="card scanner-section">
-            <div class="loading-spinner" id="loader-f1"></div>
-            <button class="btn-ai" onclick="document.getElementById('globalCamera').click()">📷 Scan Whole Case</button>
-        </div>
-        <div class="card">
+        <div class="card" style="padding: 10px;">
             <div class="table-container">
                 <table>
-                    <thead><tr><th>Flavor</th><th>AM</th><th>PM</th><th>Refill</th><th>End</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th style="width: 35%;">Flavor</th>
+                            <th>AM</th>
+                            <th>PM</th>
+                            <th>Refill</th>
+                            <th>Sold</th>
+                            <th>End</th>
+                        </tr>
+                    </thead>
                     <tbody id="f1Body"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
+    <!-- Summary Footer -->
+    <div class="summary-footer">
+        <div class="summary-item">
+            <span class="summary-label">6th Floor Sold</span>
+            <span class="summary-val" id="total-f6">0</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Total Sold</span>
+            <span class="summary-val" id="total-grand" style="color: white; border-bottom: 2px solid var(--bissingers-gold);">0</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">1st Floor Sold</span>
+            <span class="summary-val" id="total-f1">0</span>
+        </div>
+    </div>
+
     <script>
-        const apiKey = "";
-        const f6List = ["Birthday Cake Truffle", "Wedding Cake Truffle", "Root Beer Float Truffle", "Milk Chocolate Raspberry Cream", "Dark Chocolate Candy Cane", "Dark Raspberry Truffle", "Creme Brulee Truffle", "Tiramisu Truffle", "Pineapple Upside Down Cake Truffle", "Red Velvet Cake Truffle", "Irish Cream Truffle", "Chocolate Souffle Truffle", "White Euro Truffle", "White Russian Truffle", "Chocolate Milk Shake Truffle", "Dark Chocolate Caramel Macchiato Truffle", "German Chocolate Truffle", "Dark Chocolate Cherry Cordials", "Milk Swiss Chocolate Truffle", "Dark Swiss Chocolate Truffle", "Dark Sea Salt Caramel Truffle", "Strawberry Truffle", "Strawberry Cheese Cake Truffle", "Pistachio Crown Truffle", "Italian Espresso Truffle", "Dark Chocolate Caramel", "Fresh Mint Truffle", "Dark Creme Mints", "Milk Sea Salt Caramel", "Dark Cinnamon Almond Caramel", "Milk Chocolate Swiss Pecan Cream", "Milk Vanilla Dreams", "French Vanilla B", "Milk Chocolate English Almond Toffee", "Dark Chocolate English Almond Toffee", "Dark Lemon Creme", "Raspberry Caramel Jewel"];
-        const f1List = ["Birthday Cake Truffle", "Wedding Cake Truffle", "White Euro Truffle", "Dark Chocolate Sea Salt Caramel", "White Chocolate Christmas Cookie Truffle", "Dark Chocolate Candy Cane", "White Chocolate Eggnog", "Milk Chocolate Caramel Fudge Brownie", "Milk Chocolate Peanut Butter", "Milk Chocolate French Salt Caramel", "Cherry Cordials", "Milk Chocolate Swiss Pecan Creme"];
+        const f6List = [
+            "Birthday Cake Truffle", "Wedding Cake Truffle", "Root Beer Float Truffle", 
+            "Milk Chocolate Raspberry Cream", "Dark Chocolate Candy Cane", 
+            "Dark Chocolate maple Pecan Cream", "Creme Brulee Truffle", 
+            "Tiramisu Truffle", "Pineapple Upside Down Cake Truffle", "Red Velvet Cake Truffle", 
+            "Irish Cream Truffle", "Chocolate Souffle Truffle", "White Euro Truffle", 
+            "White Russian Truffle", "Chocolate Milk Shake Truffle", 
+            "Dark Chocolate Caramel Macchiato Truffle", "German Chocolate Truffle", 
+            "Milk Swiss Chocolate Truffle", "Dark Swiss Chocolate Truffle", 
+            "Dark Sea Salt Caramel Truffle", "Milk Chocolate Raspberry Cream", 
+            "Strawberry Cheese Cake Truffle", "Pistachio Crown Truffle", "Italian Espresso Truffle", 
+            "Dark Chocolate Caramel", "Fresh Mint Truffle", "Dark Creme Mints", 
+            "Milk Sea Salt Caramel", "Dark Cinnamon Almond Caramel", 
+            "Milk Chocolate Swiss Pecan Cream", "Milk Vanilla Dreams", "French Vanilla B", 
+            "Milk Chocolate English Almond Toffee", "Dark Chocolate English Almond Toffee", 
+            "Dark Lemon Creme", "Raspberry Caramel Jewel"
+        ];
+        
+        const f1List = [
+            "Birthday Cake Truffle", "Wedding Cake Truffle", "White Euro Truffle", 
+            "Dark Chocolate Sea Salt Caramel", "White Chocolate Christmas Cookie Truffle", 
+            "Dark Chocolate Candy Cane", "White Chocolate Eggnog", 
+            "Milk Chocolate Caramel Fudge Brownie", "Milk Chocolate Peanut Butter", 
+            "Milk Chocolate French Salt Caramel", "Cherry Cordials", 
+            "Milk Chocolate Swiss Pecan Creme"
+        ];
 
         let currentFloor = 'f6';
-        let currentRowTarget = null;
 
         function init() {
             const d = document.getElementById('trackingDate');
@@ -212,110 +335,64 @@
                 const id = `${prefix}_${i}`;
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td style="font-size: 0.85rem;">${name}</td>
-                    <td><input type="number" id="${id}_am" oninput="calc('${id}')" placeholder="0"></td>
+                    <td>${name}</td>
+                    <td><input type="number" id="${id}_am" class="count-input" oninput="calc('${id}')" placeholder="0"></td>
+                    <td><input type="number" id="${id}_pm" class="count-input" oninput="calc('${id}')" placeholder="0"></td>
                     <td>
-                        <div class="pm-cell">
-                            <input type="number" id="${id}_pm" oninput="calc('${id}')" placeholder="0">
-                            <button class="btn-row-scan" onclick="triggerRowScan('${id}', '${name}')">Scan</button>
-                            <div class="loading-spinner" id="${id}_loader" style="width:14px;height:14px;border-width:2px;"></div>
+                        <div class="refill-cell">
+                            <input type="number" id="${id}_refill" class="count-input" oninput="calc('${id}')" placeholder="0">
+                            <div class="quick-btns">
+                                <button class="q-btn" onclick="quickAdd('${id}', 1)">+1</button>
+                                <button class="q-btn" onclick="quickAdd('${id}', 6)">+6</button>
+                            </div>
                         </div>
                     </td>
-                    <td><input type="number" id="${id}_refill" oninput="calc('${id}')" placeholder="0"></td>
+                    <td class="sold-text" id="${id}_sold">0</td>
                     <td class="calculated" id="${id}_end">0</td>
                 `;
                 container.appendChild(row);
             });
         }
 
-        async function apiFetch(payload, retries = 5) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (response.ok) return await response.json();
-                    if (response.status === 429) await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
-                } catch (e) { if (i === retries - 1) throw e; }
-            }
-            throw new Error("API failed");
+        function quickAdd(id, val) {
+            const el = document.getElementById(`${id}_refill`);
+            el.value = (parseInt(el.value) || 0) + val;
+            calc(id);
         }
-
-        async function handleBatchUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const loader = document.getElementById(`loader-${currentFloor}`);
-            loader.style.display = 'block';
-            
-            try {
-                const base64 = await toBase64(file);
-                const list = currentFloor === 'f6' ? f6List : f1List;
-                const prompt = `This is an image of a chocolate truffle display case. Count the remaining truffles for each flavor: ${list.join(", ")}. Return ONLY JSON: {"results": [{"flavor": "Flavor Name", "count": 5}]}`;
-                
-                const data = await apiFetch({
-                    contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64.split(',')[1] } }] }],
-                    generationConfig: { responseMimeType: "application/json" }
-                });
-
-                const results = JSON.parse(data.candidates[0].content.parts[0].text);
-                results.results.forEach(res => {
-                    const idx = list.indexOf(res.flavor);
-                    if (idx !== -1) {
-                        const input = document.getElementById(`${currentFloor}_${idx}_pm`);
-                        input.value = res.count;
-                        calc(`${currentFloor}_${idx}`);
-                    }
-                });
-                showToast("Batch scan complete");
-            } catch (e) {
-                showToast("Scan failed. Try again.");
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-
-        function triggerRowScan(id, flavor) {
-            currentRowTarget = { id, flavor };
-            document.getElementById('rowCamera').click();
-        }
-
-        async function handleRowUpload(event) {
-            const file = event.target.files[0];
-            if (!file || !currentRowTarget) return;
-            const loader = document.getElementById(`${currentRowTarget.id}_loader`);
-            loader.style.display = 'block';
-
-            try {
-                const base64 = await toBase64(file);
-                const prompt = `Identify count for truffle flavor "${currentRowTarget.flavor}". Return ONLY the number.`;
-                const data = await apiFetch({
-                    contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64.split(',')[1] } }] }]
-                });
-
-                const text = data.candidates[0].content.parts[0].text.trim();
-                const count = parseInt(text.replace(/\D/g, ''));
-                if (!isNaN(count)) {
-                    document.getElementById(`${currentRowTarget.id}_pm`).value = count;
-                    calc(currentRowTarget.id);
-                    showToast(`Counted ${count} for ${currentRowTarget.flavor}`);
-                }
-            } catch (e) {
-                showToast("Row scan failed");
-            } finally {
-                loader.style.display = 'none';
-                currentRowTarget = null;
-            }
-        }
-
-        function toBase64(file) { return new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(file); }); }
 
         function calc(id) {
+            const am = parseInt(document.getElementById(`${id}_am`).value) || 0;
             const pm = parseInt(document.getElementById(`${id}_pm`).value) || 0;
             const refill = parseInt(document.getElementById(`${id}_refill`).value) || 0;
-            document.getElementById(`${id}_end`).textContent = pm + refill;
+            
+            const end = pm + refill;
+            const endEl = document.getElementById(`${id}_end`);
+            endEl.textContent = end;
+
+            if (end > 0 && end < 5) {
+                endEl.classList.add('low-stock');
+            } else {
+                endEl.classList.remove('low-stock');
+            }
+
+            const sold = Math.max(0, (am + refill) - pm);
+            document.getElementById(`${id}_sold`).textContent = sold;
+
+            updateTotals();
             saveData();
+        }
+
+        function updateTotals() {
+            const sumSold = (prefix, list) => list.reduce((acc, _, i) => {
+                return acc + (parseInt(document.getElementById(`${prefix}_${i}_sold`).textContent) || 0);
+            }, 0);
+
+            const f6Total = sumSold('f6', f6List);
+            const f1Total = sumSold('f1', f1List);
+
+            document.getElementById('total-f6').textContent = f6Total;
+            document.getElementById('total-f1').textContent = f1Total;
+            document.getElementById('total-grand').textContent = f6Total + f1Total;
         }
 
         function switchFloor(f) {
@@ -327,8 +404,10 @@
         }
 
         function updateDateDisplay() {
-            const d = new Date(document.getElementById('trackingDate').value);
-            document.getElementById('displayDate').textContent = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+            const dInput = document.getElementById('trackingDate').value;
+            if(!dInput) return;
+            const d = new Date(dInput + 'T00:00:00');
+            document.getElementById('displayDate').textContent = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
 
         function saveData() {
@@ -345,11 +424,11 @@
                 f6: pack('f6', f6List),
                 f1: pack('f1', f1List)
             };
-            localStorage.setItem('biss_data_v3', JSON.stringify(data));
+            localStorage.setItem('biss_data_v7', JSON.stringify(data));
         }
 
         function loadData() {
-            const raw = localStorage.getItem('biss_data_v3');
+            const raw = localStorage.getItem('biss_data_v7');
             if (!raw) return;
             const data = JSON.parse(raw);
             document.getElementById('trackingDate').value = data.d;
@@ -381,6 +460,80 @@
             const t = document.getElementById('toast');
             t.textContent = m; t.style.opacity = 1;
             setTimeout(() => t.style.opacity = 0, 2500);
+        }
+
+        function copyTextReport() {
+            const date = document.getElementById('displayDate').textContent;
+            const oMod = document.getElementById('openingMod').value || "N/A";
+            const cMod = document.getElementById('closingMod').value || "N/A";
+            
+            let report = `BISSINGER'S TRUFFLE REPORT\nDate: ${date}\nOpening MOD: ${oMod}\nClosing MOD: ${cMod}\n\n`;
+            
+            const addSection = (title, list, prefix) => {
+                report += `--- ${title.toUpperCase()} FLOOR ---\n`;
+                let sectionTotal = 0;
+                list.forEach((name, i) => {
+                    const id = `${prefix}_${i}`;
+                    const am = document.getElementById(`${id}_am`).value || 0;
+                    const pm = document.getElementById(`${id}_pm`).value || 0;
+                    const refill = document.getElementById(`${id}_refill`).value || 0;
+                    const sold = document.getElementById(`${id}_sold`).textContent;
+                    const end = document.getElementById(`${id}_end`).textContent;
+                    
+                    if (parseInt(sold) > 0 || parseInt(am) > 0 || parseInt(refill) > 0) {
+                        report += `${name}: Sold ${sold} | End Count ${end}\n`;
+                        sectionTotal += parseInt(sold);
+                    }
+                });
+                report += `Floor Total Sold: ${sectionTotal}\n\n`;
+            };
+
+            addSection("6th", f6List, "f6");
+            addSection("1st", f1List, "f1");
+            
+            const grandTotal = document.getElementById('total-grand').textContent;
+            report += `GRAND TOTAL SOLD: ${grandTotal}\n`;
+
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = report;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+            
+            showToast("Report copied to clipboard!");
+        }
+
+        function exportCSV() {
+            const date = document.getElementById('trackingDate').value;
+            let csv = `Bissinger's Truffle Report - ${date}\n`;
+            csv += `Opening MOD: ${document.getElementById('openingMod').value}, Closing MOD: ${document.getElementById('closingMod').value}\n\n`;
+            
+            const process = (floorName, list, prefix) => {
+                csv += `${floorName} FLOOR\n`;
+                csv += `Flavor,AM,PM,Refill,Sold,End\n`;
+                list.forEach((name, i) => {
+                    const id = `${prefix}_${i}`;
+                    const am = document.getElementById(`${id}_am`).value || 0;
+                    const pm = document.getElementById(`${id}_pm`).value || 0;
+                    const refill = document.getElementById(`${id}_refill`).value || 0;
+                    const sold = document.getElementById(`${id}_sold`).textContent;
+                    const end = document.getElementById(`${id}_end`).textContent;
+                    csv += `"${name}",${am},${pm},${refill},${sold},${end}\n`;
+                });
+                csv += `\n`;
+            };
+
+            process('6th', f6List, 'f6');
+            process('1st', f1List, 'f1');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Truffle_Report_${date}.csv`;
+            a.click();
+            showToast("CSV Exported");
         }
     </script>
 </body>
