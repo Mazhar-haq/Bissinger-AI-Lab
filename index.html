@@ -27,7 +27,8 @@
             background: var(--light);
             color: var(--bissingers-brown);
             line-height: 1.5;
-            padding-bottom: 100px; /* Space for summary footer */
+            /* Ensures the footer doesn't overlap the last item on scroll */
+            padding-bottom: 200px; 
         }
 
         .header {
@@ -43,7 +44,6 @@
 
         .header h1 { font-size: 1.4rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 300; }
 
-        /* STICKY TABS */
         .floor-tabs { 
             display: flex; 
             gap: 8px; 
@@ -79,7 +79,7 @@
 
         @media (min-width: 600px) {
             .input-grid { grid-template-columns: repeat(3, 1fr); }
-            body { padding: 20px; }
+            body { padding: 20px; padding-bottom: 220px; }
         }
 
         .input-group { display: flex; flex-direction: column; gap: 4px; }
@@ -112,7 +112,6 @@
             100% { opacity: 1; }
         }
 
-        /* SUMMARY FOOTER */
         .summary-footer {
             position: fixed;
             bottom: 0;
@@ -132,29 +131,19 @@
         .summary-label { font-size: 0.65rem; text-transform: uppercase; display: block; }
         .summary-val { font-size: 1.2rem; font-weight: bold; }
 
-        .btn-export {
-            background: var(--success);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-
-        .btn-copy {
-            background: var(--info);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 0.7rem; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 5px;
-        }
+        .btn-print { background: var(--success); color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 5px; }
+        .btn-copy { background: var(--info); color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 5px; }
 
         .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 12px 24px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; z-index: 1001; pointer-events: none; white-space: nowrap; }
+
+        @media print {
+            body { background: white; padding: 0; padding-bottom: 0; }
+            .floor-tabs, .btn-copy, .btn-print, .btn-reset, .tab-btn, .summary-footer, .toast { display: none !important; }
+            .floor-view { display: block !important; page-break-after: always; }
+            .card { box-shadow: none; border: 1px solid #eee; }
+            .header { background: white !important; color: black !important; border-bottom: 2px solid black; }
+            input, select { border: none; appearance: none; -webkit-appearance: none; color: black; background: transparent; }
+        }
 
         @media (max-width: 400px) {
             th { font-size: 0.55rem; }
@@ -196,10 +185,10 @@
             </div>
         </div>
         <div style="display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap;">
-            <button class="tab-btn" style="background:#eee; color:#333; flex:1; min-width: 70px;" onclick="clearAll()">Reset</button>
+            <button class="tab-btn btn-reset" style="background:#eee; color:#333; flex:1; min-width: 70px;" onclick="clearAll()">Reset</button>
             <button class="tab-btn active" style="flex:2; min-width: 140px;" onclick="lockAM()">Lock AM</button>
             <button class="btn-copy" style="flex: 1.5; min-width: 130px;" onclick="copyAMTextReport()">📋 Am text report</button>
-            <button class="btn-export" style="flex: 1; min-width: 110px;" onclick="exportCSV()">Export CSV</button>
+            <button class="btn-print" id="printBtn" style="flex: 1.5; min-width: 130px;" onclick="window.print()">🖨️ Print / Save PDF</button>
         </div>
     </div>
 
@@ -211,6 +200,7 @@
     <!-- 6th Floor -->
     <div id="f6-view" class="floor-view active">
         <div class="card" style="padding: 10px;">
+            <h2 style="font-size: 1rem; margin-bottom: 10px; text-align: center;">6th Floor Case</h2>
             <div class="table-container">
                 <table>
                     <thead>
@@ -232,6 +222,7 @@
     <!-- 1st Floor -->
     <div id="f1-view" class="floor-view">
         <div class="card" style="padding: 10px;">
+            <h2 style="font-size: 1rem; margin-bottom: 10px; text-align: center;">1st Floor Case</h2>
             <div class="table-container">
                 <table>
                     <thead>
@@ -268,59 +259,30 @@
 
     <script>
         const f6List = [
-            "BIRTHDAY CAKE TRUFFLE", 
-            "WEDDING CAKE TRUFFLE", 
-            "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE", 
-            "ROOT BEER FLOAT TRUFFLE", 
-            "STRAWBERRY TRUFFLE", 
-            "STRAWBERRY CHEESECAKE TRUFFLE", 
-            "CRÈME BRÛLÉE TRUFFLE", 
-            "TIRAMISU TRUFFLE", 
-            "PINEAPPLE UPSIDE DOWN TRUFFLE", 
-            "RED VELVET CAKE TRUFFLE", 
-            "IRISH CREAM TRUFFLE", 
-            "DARK CHOCOLATE CANDY CANE TRUFFLE", 
-            "CHOCOLATE SOUFFLÉ TRUFFLE", 
-            "WHITE EURO TRUFFLE", 
-            "WHITE RUSSIAN TRUFFLE", 
-            "CHOCOLATE MILKSHAKE TRUFFLE", 
-            "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", 
-            "DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE", 
-            "GERMAN CHOCOLATE TRUFFLE", 
-            "MILK SWISS CHOCOLATE TRUFFLE", 
-            "DARK SWISS CHOCOLATE TRUFFLE", 
-            "DARK SEA SALT CARAMEL TRUFFLE", 
-            "MILK CHOCOLATE RASPBERRY CREAM", 
-            "MILK CHOCOLATE ORANGE CREAM", 
-            "DARK CHOCOLATE MAPLE PECAN CREAM", 
-            "PISTACHIO CROWN TRUFFLE", 
-            "ITALIAN ESPRESSO TRUFFLE", 
-            "DARK CHOCOLATE CARAMEL", 
-            "FRESH MINT TRUFFLE", 
-            "DARK CREAM MINT", 
-            "MILK SEA SALT CARAMEL", 
-            "DARK CINNAMON ALMOND CARAMEL", 
-            "MILK CHOCOLATE SWISS PECAN CREAM", 
-            "MILK VANILLA DREAM", 
-            "FRENCH VANILLA \"B\"", 
-            "MILK CHOCOLATE ENGLISH ALMOND TOFFEE", 
-            "DARK CHOCOLATE ENGLISH ALMOND TOFFEE", 
-            "LEMON TEARDROP TRUFFLE", 
-            "RASPBERRY CARAMEL JEWEL"
+            "BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE", 
+            "ROOT BEER FLOAT TRUFFLE", "STRAWBERRY TRUFFLE", "STRAWBERRY CHEESECAKE TRUFFLE", 
+            "CRÈME BRÛLÉE TRUFFLE", "TIRAMISU TRUFFLE", "PINEAPPLE UPSIDE DOWN TRUFFLE", 
+            "RED VELVET CAKE TRUFFLE", "IRISH CREAM TRUFFLE", "DARK CHOCOLATE CANDY CANE TRUFFLE", 
+            "CHOCOLATE SOUFFLÉ TRUFFLE", "WHITE EURO TRUFFLE", "WHITE RUSSIAN TRUFFLE", 
+            "CHOCOLATE MILKSHAKE TRUFFLE", "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", 
+            "DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE", "GERMAN CHOCOLATE TRUFFLE", 
+            "MILK SWISS CHOCOLATE TRUFFLE", "DARK SWISS CHOCOLATE TRUFFLE", 
+            "DARK SEA SALT CARAMEL TRUFFLE", "MILK CHOCOLATE RASPBERRY CREAM", 
+            "MILK CHOCOLATE ORANGE CREAM", "DARK CHOCOLATE MAPLE PECAN CREAM", 
+            "PISTACHIO CROWN TRUFFLE", "ITALIAN ESPRESSO TRUFFLE", "DARK CHOCOLATE CARAMEL", 
+            "FRESH MINT TRUFFLE", "DARK CREAM MINT", "MILK SEA SALT CARAMEL", 
+            "DARK CINNAMON ALMOND CARAMEL", "MILK CHOCOLATE SWISS PECAN CREAM", 
+            "MILK VANILLA DREAM", "FRENCH VANILLA \"B\"", "MILK CHOCOLATE ENGLISH ALMOND TOFFEE", 
+            "DARK CHOCOLATE ENGLISH ALMOND TOFFEE", "LEMON TEARDROP TRUFFLE", "RASPBERRY CARAMEL JEWEL"
         ];
         
         const f1List = [
-            "BIRTHDAY CAKE TRUFFLE", 
-            "WEDDING CAKE TRUFFLE", 
-            "WHITE EURO TRUFFLE", 
-            "DARK CHOCOLATE SEA SALT CARAMEL TRUFFLE", 
-            "MILK CHOCOLATE TIRAMISU TRUFFLE",
-            "DARK CHOCOLATE FRENCH VANILLA \"B\"", 
-            "DARK CHOCOLATE RASPBERRY CARAMEL JEWEL", 
-            "PISTACHIO CROWN TRUFFLE", 
-            "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", 
-            "MILK CHOCOLATE FRENCH SEA SALT CARAMEL", 
-            "MILK CHOCOLATE SWISS PECAN CREAM"
+            "BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "WHITE EURO TRUFFLE", 
+            "DARK CHOCOLATE SEA SALT CARAMEL TRUFFLE", "MILK CHOCOLATE TIRAMISU TRUFFLE",
+            "FRESH MINT TRUFFLE",
+            "DARK CHOCOLATE FRENCH VANILLA \"B\"", "DARK CHOCOLATE RASPBERRY CARAMEL JEWEL", 
+            "PISTACHIO CROWN TRUFFLE", "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", 
+            "MILK CHOCOLATE FRENCH SEA SALT CARAMEL", "MILK CHOCOLATE SWISS PECAN CREAM"
         ];
 
         let currentFloor = 'f6';
@@ -355,21 +317,14 @@
             const amVal = document.getElementById(`${id}_am`).value;
             const pmVal = document.getElementById(`${id}_pm`).value;
             const refillVal = document.getElementById(`${id}_refill`).value;
-
             const am = parseInt(amVal) || 0;
             const pm = parseInt(pmVal) || 0;
             const refill = parseInt(refillVal) || 0;
-            
             const end = pm + refill;
             const endEl = document.getElementById(`${id}_end`);
             endEl.textContent = end;
-
-            if (end > 0 && end < 5) {
-                endEl.classList.add('low-stock');
-            } else {
-                endEl.classList.remove('low-stock');
-            }
-
+            if (end > 0 && end < 5) endEl.classList.add('low-stock');
+            else endEl.classList.remove('low-stock');
             const soldEl = document.getElementById(`${id}_sold`);
             if (pmVal !== "") {
                 const sold = Math.max(0, (am + refill) - pm);
@@ -377,7 +332,6 @@
             } else {
                 soldEl.textContent = "0";
             }
-
             updateTotals();
             saveData();
         }
@@ -385,13 +339,10 @@
         function updateTotals() {
             const sumEnd = (prefix, list) => list.reduce((acc, _, i) => {
                 const el = document.getElementById(`${prefix}_${i}_end`);
-                const val = el ? (parseInt(el.textContent) || 0) : 0;
-                return acc + val;
+                return acc + (el ? (parseInt(el.textContent) || 0) : 0);
             }, 0);
-
             const f6Total = sumEnd('f6', f6List);
             const f1Total = sumEnd('f1', f1List);
-
             document.getElementById('total-f6').textContent = f6Total;
             document.getElementById('total-f1').textContent = f1Total;
             document.getElementById('total-grand').textContent = f6Total + f1Total;
@@ -403,6 +354,9 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`${f}-view`).classList.add('active');
             document.getElementById(`btn-${f}`).classList.add('active');
+            
+            // Show/Hide Print button contextually
+            document.getElementById('printBtn').style.display = (f === 'f6') ? 'inline-block' : 'none';
         }
 
         function updateDateDisplay() {
@@ -410,6 +364,7 @@
             if(!dInput) return;
             const d = new Date(dInput + 'T00:00:00');
             document.getElementById('displayDate').textContent = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.title = "Truffle Tracker - " + dInput;
         }
 
         function saveData() {
@@ -426,20 +381,19 @@
                 f6: pack('f6', f6List),
                 f1: pack('f1', f1List)
             };
-            localStorage.setItem('biss_data_v13', JSON.stringify(data));
+            localStorage.setItem('biss_data_v18', JSON.stringify(data));
         }
 
         function loadData() {
-            const raw = localStorage.getItem('biss_data_v13');
+            const raw = localStorage.getItem('biss_data_v18');
             if (!raw) return;
             const data = JSON.parse(raw);
             document.getElementById('trackingDate').value = data.d;
             document.getElementById('openingMod').value = data.oMod || '';
             document.getElementById('closingMod').value = data.cMod || '';
             updateDateDisplay();
-            
-            data.f6.forEach((item, i) => {
-                const id = `f6_${i}`;
+            const apply = (p, arr) => arr.forEach((item, i) => {
+                const id = `${p}_${i}`;
                 if (!document.getElementById(`${id}_am`)) return;
                 document.getElementById(`${id}_am`).value = item.am;
                 document.getElementById(`${id}_pm`).value = item.pm;
@@ -447,17 +401,8 @@
                 if (item.l) document.getElementById(`${id}_am`).disabled = true;
                 calc(id);
             });
-
-            data.f1.forEach((item, i) => {
-                const id = `f1_${i}`;
-                if (!document.getElementById(`${id}_am`)) return;
-                document.getElementById(`${id}_am`).value = item.am;
-                document.getElementById(`${id}_pm`).value = item.pm;
-                document.getElementById(`${id}_refill`).value = item.ref;
-                if (item.l) document.getElementById(`${id}_am`).disabled = true;
-                calc(id);
-            });
-            
+            apply('f6', data.f6);
+            apply('f1', data.f1);
             updateTotals();
         }
 
@@ -478,64 +423,25 @@
         function copyAMTextReport() {
             const date = document.getElementById('displayDate').textContent;
             const oMod = document.getElementById('openingMod').value || "N/A";
-            
             let report = `BISSINGER'S AM TRUFFLE REPORT\nDate: ${date}\nOpening MOD: ${oMod}\n\n`;
-            
             const addSection = (title, list, prefix) => {
                 report += `--- ${title.toUpperCase()} FLOOR AM COUNTS ---\n`;
                 list.forEach((name, i) => {
                     const id = `${prefix}_${i}`;
                     const am = document.getElementById(`${id}_am`).value || 0;
-                    if (parseInt(am) > 0) {
-                        report += `${name}: ${am}\n`;
-                    }
+                    if (parseInt(am) > 0) report += `${name}: ${am}\n`;
                 });
                 report += `\n`;
             };
-
             addSection("6th", f6List, "f6");
             addSection("1st", f1List, "f1");
-            
             const dummy = document.createElement("textarea");
             document.body.appendChild(dummy);
             dummy.value = report;
             dummy.select();
             document.execCommand("copy");
             document.body.removeChild(dummy);
-            
             showToast("AM report copied to clipboard!");
-        }
-
-        function exportCSV() {
-            const date = document.getElementById('trackingDate').value;
-            let csv = `Bissinger's Truffle Report - ${date}\n`;
-            csv += `Opening MOD: ${document.getElementById('openingMod').value}, Closing MOD: ${document.getElementById('closingMod').value}\n\n`;
-            
-            const process = (floorName, list, prefix) => {
-                csv += `${floorName} FLOOR\n`;
-                csv += `Flavor,AM,PM,Refill,Sold,End\n`;
-                list.forEach((name, i) => {
-                    const id = `${prefix}_${i}`;
-                    const am = document.getElementById(`${id}_am`).value || 0;
-                    const pm = document.getElementById(`${id}_pm`).value || 0;
-                    const refill = document.getElementById(`${id}_refill`).value || 0;
-                    const sold = document.getElementById(`${id}_sold`).textContent;
-                    const end = document.getElementById(`${id}_end`).textContent;
-                    csv += `"${name}",${am},${pm},${refill},${sold},${end}\n`;
-                });
-                csv += `\n`;
-            };
-
-            process('6th', f6List, 'f6');
-            process('1st', f1List, 'f1');
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Truffle_Report_${date}.csv`;
-            a.click();
-            showToast("CSV Exported");
         }
     </script>
 </body>
