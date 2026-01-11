@@ -27,8 +27,7 @@
             background: var(--light);
             color: var(--bissingers-brown);
             line-height: 1.5;
-            /* Ensures the footer doesn't overlap the last item on scroll */
-            padding-bottom: 200px; 
+            padding-bottom: 220px; 
         }
 
         .header {
@@ -79,7 +78,7 @@
 
         @media (min-width: 600px) {
             .input-grid { grid-template-columns: repeat(3, 1fr); }
-            body { padding: 20px; padding-bottom: 220px; }
+            body { padding: 20px; padding-bottom: 240px; }
         }
 
         .input-group { display: flex; flex-direction: column; gap: 4px; }
@@ -134,11 +133,36 @@
         .btn-print { background: var(--success); color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 5px; }
         .btn-copy { background: var(--info); color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 5px; }
 
+        /* Custom Modal for Report Selection */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 8px;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+            border: 2px solid var(--bissingers-gold);
+        }
+        .modal-btn {
+            display: block; width: 100%; padding: 15px; margin: 10px 0;
+            border-radius: 4px; border: none; font-weight: bold; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
         .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 12px 24px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; z-index: 1001; pointer-events: none; white-space: nowrap; }
 
         @media print {
             body { background: white; padding: 0; padding-bottom: 0; }
-            .floor-tabs, .btn-copy, .btn-print, .btn-reset, .tab-btn, .summary-footer, .toast { display: none !important; }
+            .floor-tabs, .btn-copy, .btn-print, .btn-reset, .tab-btn, .summary-footer, .toast, .modal { display: none !important; }
             .floor-view { display: block !important; page-break-after: always; }
             .card { box-shadow: none; border: 1px solid #eee; }
             .header { background: white !important; color: black !important; border-bottom: 2px solid black; }
@@ -154,6 +178,15 @@
 <body onload="init()">
 
     <div id="toast" class="toast">Action Complete</div>
+
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 15px; color: var(--bissingers-brown);">Select Report Type</h3>
+            <button class="modal-btn" style="background: var(--info); color: white;" onclick="generateReport('am')">Morning (AM) Report</button>
+            <button class="modal-btn" style="background: var(--bissingers-brown); color: var(--bissingers-gold);" onclick="generateReport('pm')">Evening (PM) Report</button>
+            <button class="modal-btn" style="background: #eee; color: #333; font-size: 0.8rem;" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
 
     <div class="header">
         <h1>Bissinger's Herald Square Truffle Tracker</h1>
@@ -187,7 +220,7 @@
         <div style="display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap;">
             <button class="tab-btn btn-reset" style="background:#eee; color:#333; flex:1; min-width: 70px;" onclick="clearAll()">Reset</button>
             <button class="tab-btn active" style="flex:2; min-width: 140px;" onclick="lockAM()">Lock AM</button>
-            <button class="btn-copy" style="flex: 1.5; min-width: 130px;" onclick="copyAMTextReport()">📋 Am text report</button>
+            <button class="btn-copy" style="flex: 1.5; min-width: 130px;" onclick="openModal()">📋 Text Report</button>
             <button class="btn-print" id="printBtn" style="flex: 1.5; min-width: 130px;" onclick="window.print()">🖨️ Print / Save PDF</button>
         </div>
     </div>
@@ -354,8 +387,6 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`${f}-view`).classList.add('active');
             document.getElementById(`btn-${f}`).classList.add('active');
-            
-            // Show/Hide Print button contextually
             document.getElementById('printBtn').style.display = (f === 'f6') ? 'inline-block' : 'none';
         }
 
@@ -365,6 +396,49 @@
             const d = new Date(dInput + 'T00:00:00');
             document.getElementById('displayDate').textContent = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             document.title = "Truffle Tracker - " + dInput;
+        }
+
+        function openModal() { document.getElementById('reportModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('reportModal').style.display = 'none'; }
+
+        function generateReport(type) {
+            const date = document.getElementById('displayDate').textContent;
+            const mod = type === 'am' ? 
+                (document.getElementById('openingMod').value || "N/A") : 
+                (document.getElementById('closingMod').value || "N/A");
+            
+            let report = `BISSINGER'S ${type.toUpperCase()} TRUFFLE REPORT\nDate: ${date}\n${type === 'am' ? 'Opening' : 'Closing'} MOD: ${mod}\n\n`;
+
+            const addSection = (title, list, prefix) => {
+                report += `--- ${title.toUpperCase()} FLOOR ---\n`;
+                list.forEach((name, i) => {
+                    const id = `${prefix}_${i}`;
+                    if (type === 'am') {
+                        const am = document.getElementById(`${id}_am`).value || 0;
+                        if (parseInt(am) > 0) report += `${name}: ${am} (AM)\n`;
+                    } else {
+                        const pm = document.getElementById(`${id}_pm`).value || 0;
+                        const sold = document.getElementById(`${id}_sold`).textContent || 0;
+                        if (parseInt(pm) > 0 || parseInt(sold) > 0) {
+                            report += `${name}: Sold ${sold} | End: ${pm}\n`;
+                        }
+                    }
+                });
+                report += `\n`;
+            };
+
+            addSection("6th", f6List, "f6");
+            addSection("1st", f1List, "f1");
+
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = report;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+            
+            closeModal();
+            showToast(`${type.toUpperCase()} report copied!`);
         }
 
         function saveData() {
@@ -381,11 +455,11 @@
                 f6: pack('f6', f6List),
                 f1: pack('f1', f1List)
             };
-            localStorage.setItem('biss_data_v18', JSON.stringify(data));
+            localStorage.setItem('biss_data_v19', JSON.stringify(data));
         }
 
         function loadData() {
-            const raw = localStorage.getItem('biss_data_v18');
+            const raw = localStorage.getItem('biss_data_v19');
             if (!raw) return;
             const data = JSON.parse(raw);
             document.getElementById('trackingDate').value = data.d;
@@ -418,30 +492,6 @@
             const t = document.getElementById('toast');
             t.textContent = m; t.style.opacity = 1;
             setTimeout(() => t.style.opacity = 0, 2500);
-        }
-
-        function copyAMTextReport() {
-            const date = document.getElementById('displayDate').textContent;
-            const oMod = document.getElementById('openingMod').value || "N/A";
-            let report = `BISSINGER'S AM TRUFFLE REPORT\nDate: ${date}\nOpening MOD: ${oMod}\n\n`;
-            const addSection = (title, list, prefix) => {
-                report += `--- ${title.toUpperCase()} FLOOR AM COUNTS ---\n`;
-                list.forEach((name, i) => {
-                    const id = `${prefix}_${i}`;
-                    const am = document.getElementById(`${id}_am`).value || 0;
-                    if (parseInt(am) > 0) report += `${name}: ${am}\n`;
-                });
-                report += `\n`;
-            };
-            addSection("6th", f6List, "f6");
-            addSection("1st", f1List, "f1");
-            const dummy = document.createElement("textarea");
-            document.body.appendChild(dummy);
-            dummy.value = report;
-            dummy.select();
-            document.execCommand("copy");
-            document.body.removeChild(dummy);
-            showToast("AM report copied to clipboard!");
         }
     </script>
 </body>
