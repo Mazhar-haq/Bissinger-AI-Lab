@@ -19,14 +19,13 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Optima', 'Palatino', 'Segoe UI', serif; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 220px; }
+        body { font-family: 'Optima', 'Palatino', 'Segoe UI', serif; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 280px; }
 
         .header { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 20px 10px; border-radius: 4px; margin-bottom: 15px; text-align: center; border-bottom: 3px solid var(--bissingers-gold); position: relative; }
         .header h1 { font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 300; margin-bottom: 5px; }
         
         .settings-btn { position: absolute; right: 10px; top: 10px; background: none; border: none; color: var(--bissingers-gold); cursor: pointer; font-size: 1.2rem; }
 
-        /* AI Vision Zone */
         .ai-zone { background: var(--white); padding: 15px; border-radius: 4px; margin-bottom: 15px; border: 1px dashed var(--bissingers-gold); text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .ai-btn { background: var(--info); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto; font-size: 0.8rem; }
 
@@ -43,7 +42,6 @@
         .tab-btn { flex: 1; padding: 12px; background: #e0dcd8; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem; color: #666; transition: 0.3s; }
         .tab-btn.active { background: var(--bissingers-brown); color: var(--bissingers-gold); }
 
-        /* Show/Hide floor logic */
         .floor-view { display: none; }
         .floor-view.active { display: block; }
 
@@ -60,9 +58,16 @@
         .low-stock { color: var(--danger); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.3); }
+        .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.3); }
+        .summary-stats { display: flex; justify-content: space-around; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(197,160,89,0.3); }
         .summary-item { text-align: center; }
         .summary-val { font-size: 1.2rem; font-weight: bold; display: block; }
+
+        .top-sellers-panel { display: block; padding: 5px 10px; }
+        .top-sellers-title { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; color: var(--bissingers-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .top-sellers-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .seller-badge { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(197,160,89,0.2); }
+        .seller-count { color: #fff; font-weight: bold; }
 
         /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; justify-content: center; align-items: center; }
@@ -73,7 +78,7 @@
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--bissingers-gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 10px 20px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 1001; }
+        .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 10px 20px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 1001; }
 
         @media print {
             .floor-tabs, .ai-zone, .summary-footer, .settings-btn, button { display: none !important; }
@@ -92,7 +97,6 @@
 
     <div id="toast" class="toast">Action Complete</div>
 
-    <!-- API Key Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <h3 style="color:var(--bissingers-brown)">OpenRouter Config</h3>
@@ -103,7 +107,6 @@
         </div>
     </div>
 
-    <!-- Report Modal -->
     <div id="reportModal" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom: 15px;">Report Generation</h3>
@@ -119,7 +122,6 @@
         <p id="displayDate" style="font-size: 0.8rem; opacity: 0.8;"></p>
     </div>
 
-    <!-- Management Card -->
     <div class="card">
         <div class="input-grid">
             <div class="input-group">
@@ -130,14 +132,14 @@
                 <label>Opening MOD</label>
                 <select id="openingMod" onchange="saveData()">
                     <option value="">Select...</option>
-                    <option>Tom</option><option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
+                    <option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
                 </select>
             </div>
             <div class="input-group">
                 <label>Closing MOD</label>
                 <select id="closingMod" onchange="saveData()">
                     <option value="">Select...</option>
-                    <option>Tom</option><option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
+                    <option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
                 </select>
             </div>
         </div>
@@ -146,9 +148,11 @@
             <button style="flex: 1; padding: 10px; background: var(--info); color: white; border: none; font-weight: bold; border-radius: 4px;" onclick="openReport()">📋 Text Report</button>
             <button style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; font-weight: bold; border-radius: 4px;" onclick="window.print()">🖨️ PDF</button>
         </div>
+        <div style="margin-top: 10px;">
+            <button style="width: 100%; padding: 8px; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.7rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;" onclick="confirmReset()">Clear All Today's Data</button>
+        </div>
     </div>
 
-    <!-- AI Scan Section -->
     <div class="ai-zone">
         <input type="file" id="casePhoto" accept="image/*" style="display:none" onchange="handleVision()">
         <button class="ai-btn" onclick="document.getElementById('casePhoto').click()">
@@ -162,7 +166,6 @@
         <button class="tab-btn" id="btn-f1" onclick="switchFloor('f1')">1st Floor Case</button>
     </div>
 
-    <!-- 6th Floor -->
     <div id="f6-view" class="floor-view active">
         <div class="card" style="padding: 5px;">
             <div class="table-container">
@@ -183,7 +186,6 @@
         </div>
     </div>
 
-    <!-- 1st Floor -->
     <div id="f1-view" class="floor-view">
         <div class="card" style="padding: 5px;">
             <div class="table-container">
@@ -205,17 +207,28 @@
     </div>
 
     <div class="summary-footer">
-        <div class="summary-item">
-            <span style="font-size: 0.6rem;">F6 STOCK</span>
-            <span class="summary-val" id="total-f6">0</span>
+        <div class="summary-stats">
+            <div class="summary-item">
+                <span style="font-size: 0.6rem;">F6 STOCK</span>
+                <span class="summary-val" id="total-f6">0</span>
+            </div>
+            <div class="summary-item">
+                <span style="font-size: 0.6rem;">F1 STOCK</span>
+                <span class="summary-val" id="total-f1">0</span>
+            </div>
+            <div class="summary-item">
+                <span style="font-size: 0.6rem;">GRAND TOTAL</span>
+                <span class="summary-val" id="total-grand" style="color:white; border-bottom: 2px solid var(--bissingers-gold);">0</span>
+            </div>
         </div>
-        <div class="summary-item">
-            <span style="font-size: 0.6rem;">F1 STOCK</span>
-            <span class="summary-val" id="total-f1">0</span>
-        </div>
-        <div class="summary-item">
-            <span style="font-size: 0.6rem;">GRAND TOTAL</span>
-            <span class="summary-val" id="total-grand" style="color:white; border-bottom: 2px solid var(--bissingers-gold);">0</span>
+        
+        <div class="top-sellers-panel">
+            <div class="top-sellers-title">
+                🏆 Top Sellers Today
+            </div>
+            <div id="topSellersList" class="top-sellers-grid">
+                <div class="seller-badge" style="opacity: 0.5;">Enter PM counts to track...</div>
+            </div>
         </div>
     </div>
 
@@ -279,22 +292,16 @@
             });
         }
 
-        /**
-         * Custom navigation logic to move focus DOWN instead of RIGHT
-         */
         function handleTab(e, prefix, currentIndex, column) {
-            // Handle Tab (9) or Enter (13)
             if (e.keyCode === 9 || e.keyCode === 13) {
                 const list = prefix === 'f6' ? f6List : f1List;
                 const nextIndex = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
-                
-                // If there's a next/previous row in this column
                 if (nextIndex >= 0 && nextIndex < list.length) {
-                    e.preventDefault(); // Stop standard tab behavior
+                    e.preventDefault();
                     const nextInput = document.getElementById(`${prefix}_${nextIndex}_${column}`);
                     if (nextInput) {
                         nextInput.focus();
-                        nextInput.select(); // Highlight content for easier typing
+                        nextInput.select();
                     }
                 }
             }
@@ -335,6 +342,43 @@
             document.getElementById('total-f6').textContent = f6;
             document.getElementById('total-f1').textContent = f1;
             document.getElementById('total-grand').textContent = f6 + f1;
+            
+            updateTopSellers();
+        }
+
+        function updateTopSellers() {
+            const allSold = {};
+            
+            // Combine sales from both floors
+            const processSales = (list, prefix) => {
+                list.forEach((name, i) => {
+                    const sold = parseInt(document.getElementById(`${prefix}_${i}_sold`).textContent) || 0;
+                    if (sold > 0) {
+                        allSold[name] = (allSold[name] || 0) + sold;
+                    }
+                });
+            };
+
+            processSales(f6List, 'f6');
+            processSales(f1List, 'f1');
+
+            const sorted = Object.entries(allSold)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const container = document.getElementById('topSellersList');
+            if (sorted.length === 0) {
+                container.innerHTML = `<div class="seller-badge" style="opacity: 0.5;">No sales recorded yet...</div>`;
+                return;
+            }
+
+            container.innerHTML = sorted.map(([name, count], index) => `
+                <div class="seller-badge">
+                    <span style="color: var(--bissingers-gold); font-weight: bold;">#${index+1}</span>
+                    <span style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</span>
+                    <span class="seller-count">${count}</span>
+                </div>
+            `).join('');
         }
 
         function switchFloor(f) {
@@ -360,6 +404,14 @@
             btn.style.opacity = "0.5";
             saveData();
             showToast("Morning counts locked.");
+        }
+
+        function confirmReset() {
+            const confirmed = window.confirm("Are you sure you want to clear ALL data for today? This cannot be undone.");
+            if (confirmed) {
+                localStorage.removeItem('biss_truffle_full_v1');
+                location.reload();
+            }
         }
 
         function saveData() {
@@ -438,7 +490,7 @@
                         method: "POST",
                         headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            model: "nvidia/nemotron-4-340b-instruct", 
+                            model: "google/gemini-2.0-flash-001", 
                             messages: [{
                                 role: "user",
                                 content: [
