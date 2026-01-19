@@ -244,9 +244,11 @@
             "DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE", "GERMAN CHOCOLATE TRUFFLE", 
             "RASPBERRY CARAMEL JEWEL", "MILK SWISS CHOCOLATE TRUFFLE", "DARK SWISS CHOCOLATE TRUFFLE", 
             "PINEAPPLE UPSIDE DOWN TRUFFLE", "MILK CHOCOLATE RASPBERRY CREAM", 
+            "DARK HIMALAYAN SEA SALT CARAMEL",
             "MILK CHOCOLATE ORANGE CREAM", "DARK CHOCOLATE MAPLE PECAN CREAM", 
             "PISTACHIO CROWN TRUFFLE", "ITALIAN ESPRESSO TRUFFLE", "DARK CHOCOLATE CARAMEL", 
             "FRESH MINT TRUFFLE", "DARK CREAM MINT", "MILK SEA SALT CARAMEL", 
+            "MILK CHOCOLATE PECAN CARAMEL",
             "DARK CINNAMON ALMOND CARAMEL", "MILK CHOCOLATE SWISS PECAN CREAM", 
             "MILK VANILLA DREAM", "FRENCH VANILLA \"B\"", "MILK CHOCOLATE ENGLISH ALMOND TOFFEE", 
             "DARK CHOCOLATE ENGLISH ALMOND TOFFEE", "LEMON TEARDROP TRUFFLE"
@@ -266,10 +268,10 @@
             "IRISH CREAM TRUFFLE", "DARK CHOCOLATE CANDY CANE TRUFFLE",
             "WHITE EURO TRUFFLE", "WHITE RUSSIAN TRUFFLE",
             "CHOCOLATE MILKSHAKE TRUFFLE", "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE",
-            "MILK CHOCOLATE RASPBERRY CREAM", "MILK CHOCOLATE ORANGE CREAM",
+            "MILK CHOCOLATE RASPBERRY CREAM", "DARK HIMALAYAN SEA SALT CARAMEL", "MILK CHOCOLATE ORANGE CREAM",
             "DARK CHOCOLATE MAPLE PECAN CREAM", "ITALIAN ESPRESSO TRUFFLE",
             "DARK CHOCOLATE CARAMEL", "FRESH MINT TRUFFLE",
-            "DARK CREAM MINT", "MILK SEA SALT CARAMEL",
+            "DARK CREAM MINT", "MILK SEA SALT CARAMEL", "MILK CHOCOLATE PECAN CARAMEL",
             "MILK VANILLA DREAM", "FRENCH VANILLA \"B\""
         ];
 
@@ -323,7 +325,10 @@
         }
 
         function calc(id) {
-            const am = parseInt(document.getElementById(`${id}_am`).value) || 0;
+            const amInput = document.getElementById(`${id}_am`);
+            if (!amInput) return; // Guard for list changes
+
+            const am = parseInt(amInput.value) || 0;
             const ref = parseInt(document.getElementById(`${id}_refill`).value) || 0;
             const pmInput = document.getElementById(`${id}_pm`);
             const pmVal = pmInput.value;
@@ -350,7 +355,10 @@
         }
 
         function updateTotals() {
-            const sum = (prefix, list) => list.reduce((acc, _, i) => acc + (parseInt(document.getElementById(`${prefix}_${i}_end`).textContent) || 0), 0);
+            const sum = (prefix, list) => list.reduce((acc, _, i) => {
+                const el = document.getElementById(`${prefix}_${i}_end`);
+                return acc + (el ? (parseInt(el.textContent) || 0) : 0);
+            }, 0);
             const f6 = sum('f6', f6List);
             const f1 = sum('f1', f1List);
             document.getElementById('total-f6').textContent = f6;
@@ -362,7 +370,8 @@
         function updateTopSellers() {
             const sales = {};
             const tally = (list, prefix) => list.forEach((name, i) => {
-                const s = parseInt(document.getElementById(`${prefix}_${i}_sold`).textContent) || 0;
+                const el = document.getElementById(`${prefix}_${i}_sold`);
+                const s = el ? (parseInt(el.textContent) || 0) : 0;
                 if (s > 0) sales[name] = (sales[name] || 0) + s;
             });
             tally(f6List, 'f6'); tally(f1List, 'f1');
@@ -403,9 +412,9 @@
 
         function saveData() {
             const map = (list, prefix) => list.map((_, i) => ({
-                am: document.getElementById(`${prefix}_${i}_am`).value,
-                ref: document.getElementById(`${prefix}_${i}_refill`).value,
-                pm: document.getElementById(`${prefix}_${i}_pm`).value
+                am: document.getElementById(`${prefix}_${i}_am`)?.value || "",
+                ref: document.getElementById(`${prefix}_${i}_refill`)?.value || "",
+                pm: document.getElementById(`${prefix}_${i}_pm`)?.value || ""
             }));
             const data = {
                 date: document.getElementById('trackingDate').value,
@@ -427,12 +436,16 @@
             
             const fill = (list, prefix, arr) => list.forEach((_, i) => {
                 const id = `${prefix}_${i}`;
-                if (arr[i]) {
-                    document.getElementById(`${id}_am`).value = arr[i].am;
-                    document.getElementById(`${id}_refill`).value = arr[i].ref;
-                    document.getElementById(`${id}_pm`).value = arr[i].pm;
+                const amIn = document.getElementById(`${id}_am`);
+                const refIn = document.getElementById(`${id}_refill`);
+                const pmIn = document.getElementById(`${id}_pm`);
+                
+                if (arr && arr[i]) {
+                    if(amIn) amIn.value = arr[i].am;
+                    if(refIn) refIn.value = arr[i].ref;
+                    if(pmIn) pmIn.value = arr[i].pm;
                 }
-                if (d.amLocked) document.getElementById(`${id}_am`).disabled = true;
+                if (d.amLocked && amIn) amIn.disabled = true;
                 calc(id);
             });
             fill(f6List, 'f6', d.f6); fill(f1List, 'f1', d.f1);
@@ -456,9 +469,9 @@
                 report += `--- ${title} FLOOR ---\n`;
                 list.forEach((name, i) => {
                     const id = `${prefix}_${i}`;
-                    const am = document.getElementById(`${id}_am`).value || 0;
-                    const pm = document.getElementById(`${id}_pm`).value || 0;
-                    const sold = document.getElementById(`${id}_sold`).textContent;
+                    const am = document.getElementById(`${id}_am`)?.value || 0;
+                    const pm = document.getElementById(`${id}_pm`)?.value || 0;
+                    const sold = document.getElementById(`${id}_sold`)?.textContent || 0;
                     if (type === 'am' && am > 0) report += `${name}: AM ${am}\n`;
                     if (type === 'pm' && (pm > 0 || sold > 0)) report += `${name}: Sold ${sold} | End ${pm}\n`;
                 });
