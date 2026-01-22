@@ -118,21 +118,9 @@
             document.getElementById('cameraInput').click();
         }
 
-        async function handleImage(event) {
-            const file = event.target.files[0];
-            if (!file || !currentActiveRowId) return;
-            document.getElementById('aiStatus').style.display = 'block';
-            document.getElementById('aiStatus').textContent = `Identifying ${currentActiveFlavorName}...`;
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                const base64Image = reader.result.split(',')[1];
-                await callAI(base64Image);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function callAI(base64Data) {
+async function callAI(base64Data) {
             const API_KEY = "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"; 
+            
             try {
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
@@ -147,19 +135,22 @@
                         "messages": [{
                             "role": "user",
                             "content": [
-                                { "type": "text", "text": `Count the number of ${currentActiveFlavorName} pieces in this image. Return ONLY the number as a plain integer. If none, return 0.` },
+                                { "type": "text", "text": `Count the number of ${currentActiveFlavorName} pieces. Return ONLY the number.` },
                                 { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Data}` } }
                             ]
-                        }]
+                        }],
+                        // ADD THIS LINE TO HELP WITH "PROVIDER ERRORS":
+                        "provider": { "allow_fallbacks": true }
                     })
                 });
 
+                const result = await response.json();
+
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || "API error");
+                    // This will tell us EXACTLY what the provider didn't like
+                    throw new Error(result.error?.message || "Provider Overloaded");
                 }
 
-                const result = await response.json();
                 const aiResponse = result.choices[0].message.content.trim();
                 const count = parseInt(aiResponse.replace(/[^0-9]/g, '')) || 0;
                 
@@ -167,11 +158,12 @@
                 calc(currentActiveRowId);
                 showToast(`Found ${count} ${currentActiveFlavorName}`);
             } catch (e) {
-                console.error(e);
-                alert("AI Error: " + e.message);
+                console.error("AI Debug:", e);
+                // If it's a provider error, suggest a retry
+                alert("AI Busy: The free server is crowded. Please try one more time.");
             } finally {
                 document.getElementById('aiStatus').style.display = 'none';
-                document.getElementById('cameraInput').value = ""; // Reset input
+                document.getElementById('cameraInput').value = ""; 
             }
         }
 
