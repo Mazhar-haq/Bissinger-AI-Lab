@@ -76,7 +76,7 @@
         <div id="total-grand" style="font-size: 1.5rem; font-weight: bold;">0</div>
     </div>
 
-    <script>
+   <script>
         const f6List = ["BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE", "TIRAMISU TRUFFLE", "DARK SEA SALT CARAMEL TRUFFLE", "RED VELVET CAKE TRUFFLE", "IRISH CREAM TRUFFLE", "CHOCOLATE SOUFFLÉ TRUFFLE", "WHITE EURO TRUFFLE", "DARK HIMALAYAN SEA SALT CARAMEL", "DARK CHOCOLATE CARAMEL", "FRESH MINT TRUFFLE", "MILK SEA SALT CARAMEL", "MILK CHOCOLATE PECAN CARAMEL"];
         const f1List = ["BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "WHITE EURO TRUFFLE", "FRESH MINT TRUFFLE", "PISTACHIO CROWN TRUFFLE"];
 
@@ -112,39 +112,46 @@
             });
         }
 
-       async function handleImage(event) {
+        function startRowScan(id, name) {
+            currentActiveRowId = id;
+            currentActiveFlavorName = name;
+            document.getElementById('cameraInput').click();
+        }
+
+        async function handleImage(event) {
             const file = event.target.files[0];
-            if (!file || !currentActiveRowId) return;
+            if (!file) return;
 
-            document.getElementById('aiStatus').style.display = 'block';
-            document.getElementById('aiStatus').textContent = `Identifying ${currentActiveFlavorName}...`;
+            // 1. Show Status Immediately
+            const status = document.getElementById('aiStatus');
+            status.style.display = 'block';
+            status.textContent = `Scanning ${currentActiveFlavorName}...`;
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    // COMPRESSION: Shrink image to max 800px to avoid Provider Errors
-                    const canvas = document.createElement('canvas');
-                    const max_size = 800;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > max_size) { height *= max_size / width; width = max_size; }
-                    } else {
-                        if (height > max_size) { width *= max_size / height; height = max_size; }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-                    callAI(compressedBase64);
+            try {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = async (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = async () => {
+                        // 2. Resize to prevent "413 Payload Too Large" errors
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800;
+                        const scale = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scale;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        const base64Data = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+                        await callAI(base64Data);
+                    };
                 };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            } catch (err) {
+                alert("Upload failed: " + err.message);
+                status.style.display = 'none';
+            }
         }
 
         async function callAI(base64Data) {
@@ -163,7 +170,7 @@
                         "messages": [{
                             "role": "user",
                             "content": [
-                                { "type": "text", "text": `Count the number of ${currentActiveFlavorName} pieces. Return ONLY the number.` },
+                                { "type": "text", "text": `Count how many ${currentActiveFlavorName} pieces are in the tray. ONLY return the number.` },
                                 { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Data}` } }
                             ]
                         }]
@@ -171,27 +178,14 @@
                 });
 
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.error?.message || "Provider Busy");
+                if (!response.ok) throw new Error(result.error?.message || "AI Busy");
 
-                const aiResponse = result.choices[0].message.content.trim();
-                const count = parseInt(aiResponse.replace(/[^0-9]/g, '')) || 0;
+                const count = parseInt(result.choices[0].message.content.replace(/[^0-9]/g, '')) || 0;
                 
                 document.getElementById(`${currentActiveRowId}_am`).value = count;
                 calc(currentActiveRowId);
-                showToast(`Found ${count} ${currentActiveFlavorName}`);
+                showToast(`Success: ${count} detected`);
             } catch (e) {
-                console.error(e);
-                alert("AI Error: " + e.message + " - Try taking a clearer photo.");
-            } finally {
-                document.getElementById('aiStatus').style.display = 'none';
-                document.getElementById('cameraInput').value = ""; 
-            }
-        }
-                document.getElementById(`${currentActiveRowId}_am`).value = count;
-                calc(currentActiveRowId);
-                showToast(`Found ${count} ${currentActiveFlavorName}`);
-            } catch (e) {
-                console.error(e);
                 alert("AI Error: " + e.message);
             } finally {
                 document.getElementById('aiStatus').style.display = 'none';
@@ -201,10 +195,14 @@
 
         function calc(id) {
             const am = parseInt(document.getElementById(`${id}_am`).value) || 0;
+            const refill = parseInt(document.getElementById(`${id}_refill`).value) || 0;
             const pmVal = document.getElementById(`${id}_pm`).value;
             const pm = parseInt(pmVal) || 0;
             const soldEl = document.getElementById(`${id}_sold`);
-            if (pmVal !== "") { soldEl.textContent = Math.max(0, am - pm); }
+            
+            if (pmVal !== "") { 
+                soldEl.textContent = Math.max(0, (am + refill) - pm); 
+            }
             updateTotals();
             saveData();
         }
@@ -222,12 +220,17 @@
             document.getElementById(`btn-${f}`).classList.add('active');
         }
 
-        function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 2000); }
+        function showToast(m) { 
+            const t = document.getElementById('toast'); 
+            t.textContent = m; 
+            t.style.opacity = 1; 
+            setTimeout(()=>t.style.opacity=0, 3000); 
+        }
 
         function saveData() {
             const data = {
-                f6: f6List.map((_, i) => ({ am: document.getElementById(`f6_${i}_am`).value, pm: document.getElementById(`f6_${i}_pm`).value })),
-                f1: f1List.map((_, i) => ({ am: document.getElementById(`f1_${i}_am`).value, pm: document.getElementById(`f1_${i}_pm`).value }))
+                f6: f6List.map((_, i) => ({ am: document.getElementById(`f6_${i}_am`).value, refill: document.getElementById(`f6_${i}_refill`).value, pm: document.getElementById(`f6_${i}_pm`).value })),
+                f1: f1List.map((_, i) => ({ am: document.getElementById(`f1_${i}_am`).value, refill: document.getElementById(`f1_${i}_refill`).value, pm: document.getElementById(`f1_${i}_pm`).value }))
             };
             localStorage.setItem('biss_lab_v2', JSON.stringify(data));
         }
@@ -239,6 +242,7 @@
             const fill = (list, prefix, arr) => list.forEach((_, i) => {
                 if(arr && arr[i]) { 
                     document.getElementById(`${prefix}_${i}_am`).value = arr[i].am; 
+                    document.getElementById(`${prefix}_${i}_refill`).value = arr[i].refill || 0;
                     document.getElementById(`${prefix}_${i}_pm`).value = arr[i].pm;
                     calc(`${prefix}_${i}`);
                 }
@@ -246,5 +250,3 @@
             fill(f6List, 'f6', d.f6); fill(f1List, 'f1', d.f1);
         }
     </script>
-</body>
-</html>
