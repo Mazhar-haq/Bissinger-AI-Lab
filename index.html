@@ -12,34 +12,23 @@
             --white: #ffffff;
             --ai-purple: #7b2cbf;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Optima', 'Palatino', serif; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 150px; }
-
         .header { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--bissingers-gold); margin-bottom: 10px; }
-        
         #aiStatus { display: none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: var(--ai-purple); color: white; padding: 10px 20px; border-radius: 20px; z-index: 10000; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 0.8rem; }
-
         .card { background: var(--white); padding: 12px; border-radius: 4px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        
         .floor-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
         .tab-btn { flex: 1; padding: 12px; background: #ddd; border: none; border-radius: 4px; font-weight: bold; font-size: 0.7rem; }
         .tab-btn.active { background: var(--bissingers-brown); color: var(--bissingers-gold); }
-
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { background: var(--bissingers-brown); color: var(--bissingers-gold); font-size: 0.6rem; padding: 8px 2px; text-transform: uppercase; }
         td { padding: 6px 2px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.8rem; overflow: hidden; }
-        
-        /* Flavor Name Cell with Scan Button */
         .flavor-cell { text-align: left; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 0.7rem; }
         .row-scan-btn { background: var(--ai-purple); color: white; border: none; border-radius: 4px; padding: 4px 6px; font-size: 0.8rem; cursor: pointer; }
-
         .count-input { width: 100%; text-align: center; padding: 4px 0; border: 1px solid #ccc; border-radius: 2px; }
-        
         .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; text-align: center; }
         .floor-view { display: none; }
         .floor-view.active { display: block; }
-
         .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 8px 16px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 10001; }
     </style>
 </head>
@@ -92,6 +81,7 @@
         const f1List = ["BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "WHITE EURO TRUFFLE", "FRESH MINT TRUFFLE", "PISTACHIO CROWN TRUFFLE"];
 
         let currentActiveRowId = null;
+        let currentActiveFlavorName = "";
 
         function init() {
             const d = document.getElementById('trackingDate');
@@ -128,17 +118,27 @@
             document.getElementById('cameraInput').click();
         }
 
+        async function handleImage(event) {
+            const file = event.target.files[0];
+            if (!file || !currentActiveRowId) return;
+            document.getElementById('aiStatus').style.display = 'block';
+            document.getElementById('aiStatus').textContent = `Identifying ${currentActiveFlavorName}...`;
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64Image = reader.result.split(',')[1];
+                await callAI(base64Image);
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function callAI(base64Data) {
-            // Your key is here and looks correct!
             const API_KEY = "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"; 
-            
             try {
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
                     headers: { 
                         "Authorization": `Bearer ${API_KEY}`, 
                         "Content-Type": "application/json",
-                        // THESE TWO LINES ARE OFTEN REQUIRED FOR FREE MODELS:
                         "HTTP-Referer": "https://mazhar-haq.github.io/", 
                         "X-Title": "Bissinger Tracker Lab"
                     },
@@ -156,11 +156,10 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error?.message || "API limit reached or key invalid");
+                    throw new Error(errorData.error?.message || "API error");
                 }
 
                 const result = await response.json();
-                // Improved parsing to handle if the AI adds extra text
                 const aiResponse = result.choices[0].message.content.trim();
                 const count = parseInt(aiResponse.replace(/[^0-9]/g, '')) || 0;
                 
@@ -172,13 +171,7 @@
                 alert("AI Error: " + e.message);
             } finally {
                 document.getElementById('aiStatus').style.display = 'none';
-            }
-        }
-                showToast(`Found ${count} ${currentActiveFlavorName}`);
-            } catch (e) {
-                alert("AI error. Check your API key.");
-            } finally {
-                document.getElementById('aiStatus').style.display = 'none';
+                document.getElementById('cameraInput').value = ""; // Reset input
             }
         }
 
@@ -220,7 +213,7 @@
             if (!raw) return;
             const d = JSON.parse(raw);
             const fill = (list, prefix, arr) => list.forEach((_, i) => {
-                if(arr[i]) { 
+                if(arr && arr[i]) { 
                     document.getElementById(`${prefix}_${i}_am`).value = arr[i].am; 
                     document.getElementById(`${prefix}_${i}_pm`).value = arr[i].pm;
                     calc(`${prefix}_${i}`);
