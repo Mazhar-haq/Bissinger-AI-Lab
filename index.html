@@ -3,295 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bissinger's Herald Square Truffle Tracker</title>
+    <title>Bissinger's AI Lab - Precision Scanner</title>
     <style>
         :root {
             --bissingers-brown: #3d2b1f; 
             --bissingers-gold: #c5a059;  
-            --bissingers-cream: #f9f6f2;
-            --primary: var(--bissingers-brown);
-            --accent: var(--bissingers-gold);
-            --success: #4a6741;
-            --danger: #9e2a2b;
-            --info: #2c3e50;
             --light: #f4eee8;
             --white: #ffffff;
-            --half-plate-bg: #fffbf0;
+            --ai-purple: #7b2cbf;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Optima', 'Palatino', 'Segoe UI', serif; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 280px; }
+        body { font-family: 'Optima', 'Palatino', serif; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 150px; }
 
-        .header { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 20px 10px; border-radius: 4px; margin-bottom: 15px; text-align: center; border-bottom: 3px solid var(--bissingers-gold); position: relative; }
-        .header h1 { font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 300; margin-bottom: 5px; }
+        .header { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--bissingers-gold); margin-bottom: 10px; }
         
-        .settings-btn { position: absolute; right: 10px; top: 10px; background: none; border: none; color: var(--bissingers-gold); cursor: pointer; font-size: 1.2rem; }
+        #aiStatus { display: none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: var(--ai-purple); color: white; padding: 10px 20px; border-radius: 20px; z-index: 10000; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 0.8rem; }
 
-        .card { background: var(--white); padding: 15px; border-radius: 4px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(61, 43, 31, 0.1); border: 1px solid rgba(197, 160, 89, 0.2); }
+        .card { background: var(--white); padding: 12px; border-radius: 4px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        .guide-section { font-size: 0.8rem; margin-bottom: 20px; border-left: 3px solid var(--bissingers-gold); padding-left: 15px; }
-        .guide-section h3 { font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; color: var(--bissingers-brown); }
-
-        .input-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        @media (min-width: 600px) { .input-grid { grid-template-columns: repeat(3, 1fr); } }
-        
-        .input-group { display: flex; flex-direction: column; gap: 4px; }
-        .input-group label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-        input, select { padding: 8px; border: 1px solid #dcdcdc; border-radius: 2px; width: 100%; font-size: 0.9rem; }
-
-        .floor-tabs { display: flex; gap: 8px; margin-bottom: 15px; position: sticky; top: 0; z-index: 100; background: var(--light); padding: 10px 0; }
-        .tab-btn { flex: 1; padding: 12px; background: #e0dcd8; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem; color: #666; transition: 0.3s; }
+        .floor-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+        .tab-btn { flex: 1; padding: 12px; background: #ddd; border: none; border-radius: 4px; font-weight: bold; font-size: 0.7rem; }
         .tab-btn.active { background: var(--bissingers-brown); color: var(--bissingers-gold); }
 
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { background: var(--bissingers-brown); color: var(--bissingers-gold); font-size: 0.6rem; padding: 8px 2px; text-transform: uppercase; }
+        td { padding: 6px 2px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.8rem; overflow: hidden; }
+        
+        /* Flavor Name Cell with Scan Button */
+        .flavor-cell { text-align: left; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 0.7rem; }
+        .row-scan-btn { background: var(--ai-purple); color: white; border: none; border-radius: 4px; padding: 4px 6px; font-size: 0.8rem; cursor: pointer; }
+
+        .count-input { width: 100%; text-align: center; padding: 4px 0; border: 1px solid #ccc; border-radius: 2px; }
+        
+        .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; text-align: center; }
         .floor-view { display: none; }
         .floor-view.active { display: block; }
 
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 8px 4px; font-size: 0.6rem; text-transform: uppercase; }
-        td { padding: 8px 4px; border-bottom: 1px solid #f0f0f0; text-align: center; font-size: 0.85rem; }
-        td:first-child { text-align: left; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; }
-        
-        .half-plate-row { background-color: var(--half-plate-bg); }
-        .half-plate-badge { 
-            display: inline-block; 
-            font-size: 10px; 
-            background: var(--bissingers-gold); 
-            color: white; 
-            padding: 1px 4px; 
-            border-radius: 3px; 
-            margin-left: 5px; 
-            vertical-align: middle;
-            text-transform: none;
-            letter-spacing: 0;
-            font-weight: normal;
-        }
-
-        .count-input { width: 45px; text-align: center; padding: 4px; border: 1px solid #eee; }
-        .count-input:focus { border-color: var(--bissingers-gold); outline: none; background: #fffcf5; }
-        .count-input:disabled { background: #f9f9f9; color: #999; border: none; }
-
-        .sold-text { color: var(--success); font-weight: bold; }
-        .end-text { font-weight: bold; }
-        .low-stock { color: var(--danger); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.3); }
-        .summary-stats { display: flex; justify-content: space-around; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(197,160,89,0.3); }
-        .summary-item { text-align: center; }
-        .summary-val { font-size: 1.2rem; font-weight: bold; display: block; }
-
-        .top-sellers-panel { display: block; padding: 5px 10px; }
-        .top-sellers-title { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; color: var(--bissingers-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
-        .top-sellers-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .seller-badge { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(197,160,89,0.2); }
-        .seller-count { color: #fff; font-weight: bold; }
-
-        .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 10px 20px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 1001; pointer-events: none; }
-
-        @media print {
-            .floor-tabs, .summary-footer, .settings-btn, #guide, button { display: none !important; }
-            body { padding: 0; background: white; padding-bottom: 0; }
-            .card { box-shadow: none; border: 1px solid #ccc; }
-            .floor-view { display: block !important; }
-            .half-plate-row { background-color: #f9f9f9 !important; -webkit-print-color-adjust: exact; }
-        }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 8px 16px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 10001; }
     </style>
 </head>
 <body onload="init()">
 
-    <div id="toast" class="toast">Action Complete</div>
+    <div id="aiStatus">🧠 AI is identifying truffles...</div>
+    <div id="toast" class="toast">Done</div>
 
     <div class="header">
-        <button class="settings-btn" onclick="toggleGuide()">📖 Help</button>
-        <h1>Bissinger's Truffle Tracker</h1>
-        <p id="displayDate" style="font-size: 0.8rem; opacity: 0.8;"></p>
-    </div>
-
-    <div id="guide" class="card" style="display: none;">
-        <div class="guide-section">
-            <h3>☀️ Morning Shift</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter counts in <b>AM</b> column. Click <b>Lock AM</b> when done.</p>
-        </div>
-        <div class="guide-section">
-            <h3>🔄 Refills (Mid-day)</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter quantity added in <b>Refill</b>. This adds directly to your <b>End</b> count but does not change the <b>Sold</b> calculation.</p>
-        </div>
-        <div class="guide-section">
-            <h3>🌙 Evening Shift</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter closing counts in <b>PM</b>. Tracker calculates: <i>AM - PM = Sold</i>.</p>
-        </div>
-        <button onclick="toggleGuide()" style="width: 100%; padding: 8px; background: var(--bissingers-brown); color: var(--bissingers-gold); border: none; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">CLOSE GUIDE</button>
-    </div>
-
-    <div class="card">
-        <div class="input-grid">
-            <div class="input-group">
-                <label>Date</label>
-                <input type="date" id="trackingDate" onchange="updateDateDisplay(); saveData();">
-            </div>
-            <div class="input-group">
-                <label>Opening MOD</label>
-                <select id="openingMod" onchange="saveData()">
-                    <option value="">Select...</option>
-                    <option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Closing MOD</label>
-                <select id="closingMod" onchange="saveData()">
-                    <option value="">Select...</option>
-                    <option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
-                </select>
-            </div>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 15px;">
-            <button id="lockAmBtn" style="flex: 2; padding: 10px; background: var(--bissingers-gold); border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="lockAM()">Lock AM Counts</button>
-            <button style="flex: 1; padding: 10px; background: var(--info); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="openReport()">📋 Report</button>
-            <button style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="window.print()">🖨️ PDF</button>
-        </div>
-        <div style="margin-top: 10px;">
-            <button style="width: 100%; padding: 8px; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.7rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;" onclick="confirmReset()">Clear All Today's Data</button>
-        </div>
+        <h1>Bissinger's Precision Lab</h1>
+        <input type="date" id="trackingDate" style="background: none; border: none; color: white; font-family: inherit;" onchange="saveData()">
     </div>
 
     <div class="floor-tabs">
-        <button class="tab-btn active" id="btn-f6" onclick="switchFloor('f6')">6th Floor Case</button>
-        <button class="tab-btn" id="btn-f1" onclick="switchFloor('f1')">1st Floor Case</button>
+        <button class="tab-btn active" id="btn-f6" onclick="switchFloor('f6')">6th Floor</button>
+        <button class="tab-btn" id="btn-f1" onclick="switchFloor('f1')">1st Floor</button>
     </div>
 
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImage(event)">
+
     <div id="f6-view" class="floor-view active">
-        <div class="card" style="padding: 5px;">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;">Flavor</th>
-                            <th>AM</th>
-                            <th>Refill</th>
-                            <th>PM</th>
-                            <th>Sold</th>
-                            <th>End</th>
-                        </tr>
-                    </thead>
-                    <tbody id="f6Body"></tbody>
-                </table>
-            </div>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th style="width: 45%;">Flavor</th><th style="width: 15%;">AM</th><th style="width: 15%;">Refill</th><th style="width: 15%;">PM</th><th style="width: 10%;">Sold</th></tr>
+                </thead>
+                <tbody id="f6Body"></tbody>
+            </table>
         </div>
     </div>
 
     <div id="f1-view" class="floor-view">
-        <div class="card" style="padding: 5px;">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;">Flavor</th>
-                            <th>AM</th>
-                            <th>Refill</th>
-                            <th>PM</th>
-                            <th>Sold</th>
-                            <th>End</th>
-                        </tr>
-                    </thead>
-                    <tbody id="f1Body"></tbody>
-                </table>
-            </div>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th style="width: 45%;">Flavor</th><th style="width: 15%;">AM</th><th style="width: 15%;">Refill</th><th style="width: 15%;">PM</th><th style="width: 10%;">Sold</th></tr>
+                </thead>
+                <tbody id="f1Body"></tbody>
+            </table>
         </div>
     </div>
 
     <div class="summary-footer">
-        <div class="summary-stats">
-            <div class="summary-item">
-                <span style="font-size: 0.6rem;">F6 STOCK</span>
-                <span class="summary-val" id="total-f6">0</span>
-            </div>
-            <div class="summary-item">
-                <span style="font-size: 0.6rem;">F1 STOCK</span>
-                <span class="summary-val" id="total-f1">0</span>
-            </div>
-            <div class="summary-item">
-                <span style="font-size: 0.6rem;">GRAND TOTAL</span>
-                <span class="summary-val" id="total-grand" style="color:white; border-bottom: 2px solid var(--bissingers-gold);">0</span>
-            </div>
-        </div>
-        
-        <div class="top-sellers-panel">
-            <div class="top-sellers-title">🏆 Top Sellers Today</div>
-            <div id="topSellersList" class="top-sellers-grid">
-                <div class="seller-badge" style="opacity: 0.5;">Enter PM counts to track...</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="reportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center;">
-        <div style="background:white; padding:25px; border-radius:8px; width:90%; max-width:350px; text-align:center;">
-            <h3>Report Generation</h3>
-            <button style="width:100%; padding:12px; margin:8px 0; background:var(--info); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="generateReport('am')">Copy AM Report</button>
-            <button style="width:100%; padding:12px; margin:8px 0; background:var(--bissingers-brown); color:var(--bissingers-gold); border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="generateReport('pm')">Copy PM Report</button>
-            <button style="width:100%; padding:10px; margin-top:10px; border:none; background:#eee; cursor:pointer;" onclick="closeReport()">Cancel</button>
-        </div>
+        <div style="font-size: 0.7rem;">TOTAL PIECES</div>
+        <div id="total-grand" style="font-size: 1.5rem; font-weight: bold;">0</div>
     </div>
 
     <script>
-        const f6List = [
-            "BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE", 
-            "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE", "ROOT BEER FLOAT TRUFFLE", "STRAWBERRY CHEESECAKE TRUFFLE", 
-            "CRÈME BRÛLÉE TRUFFLE", "TIRAMISU TRUFFLE", "DARK SEA SALT CARAMEL TRUFFLE", 
-            "RED VELVET CAKE TRUFFLE", "IRISH CREAM TRUFFLE", "DARK CHOCOLATE CANDY CANE TRUFFLE", 
-            "CHOCOLATE SOUFFLÉ TRUFFLE", "WHITE EURO TRUFFLE", "WHITE RUSSIAN TRUFFLE", 
-            "CHOCOLATE MILKSHAKE TRUFFLE", "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", 
-            "DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE", "GERMAN CHOCOLATE TRUFFLE", 
-            "RASPBERRY CARAMEL JEWEL", "MILK SWISS CHOCOLATE TRUFFLE", "DARK SWISS CHOCOLATE TRUFFLE", 
-            "PINEAPPLE UPSIDE DOWN TRUFFLE", "MILK CHOCOLATE RASPBERRY CREAM", 
-            "DARK HIMALAYAN SEA SALT CARAMEL",
-            "MILK CHOCOLATE ORANGE CREAM", "DARK CHOCOLATE MAPLE PECAN CREAM", 
-            "PISTACHIO CROWN TRUFFLE", "ITALIAN ESPRESSO TRUFFLE", "DARK CHOCOLATE CARAMEL", 
-            "FRESH MINT TRUFFLE", "DARK CREAM MINT", "MILK SEA SALT CARAMEL", 
-            "MILK CHOCOLATE PECAN CARAMEL",
-            "DARK CINNAMON ALMOND CARAMEL", "MILK CHOCOLATE SWISS PECAN CREAM", 
-            "MILK VANILLA DREAM", "FRENCH VANILLA \"B\"", "MILK CHOCOLATE ENGLISH ALMOND TOFFEE", 
-            "DARK CHOCOLATE ENGLISH ALMOND TOFFEE", "LEMON TEARDROP TRUFFLE"
-        ];
-        
-        const f1List = [
-            "BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "WHITE EURO TRUFFLE", 
-            "DARK CHOCOLATE SEA SALT CARAMEL TRUFFLE", "MILK CHOCOLATE TIRAMISU TRUFFLE",
-            "FRESH MINT TRUFFLE", "DARK CHOCOLATE FRENCH VANILLA \"B\"", 
-            "DARK CHOCOLATE RASPBERRY CARAMEL JEWEL", "PISTACHIO CROWN TRUFFLE", 
-            "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", "MILK CHOCOLATE FRENCH SEA SALT CARAMEL", 
-            "MILK CHOCOLATE SWISS PECAN CREAM"
-        ];
+        const f6List = ["BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE", "TIRAMISU TRUFFLE", "DARK SEA SALT CARAMEL TRUFFLE", "RED VELVET CAKE TRUFFLE", "IRISH CREAM TRUFFLE", "CHOCOLATE SOUFFLÉ TRUFFLE", "WHITE EURO TRUFFLE", "DARK HIMALAYAN SEA SALT CARAMEL", "DARK CHOCOLATE CARAMEL", "FRESH MINT TRUFFLE", "MILK SEA SALT CARAMEL", "MILK CHOCOLATE PECAN CARAMEL"];
+        const f1List = ["BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "WHITE EURO TRUFFLE", "FRESH MINT TRUFFLE", "PISTACHIO CROWN TRUFFLE"];
 
-        const f6HalfPlates = [
-            "WEDDING CAKE TRUFFLE", "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE",
-            "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE",
-            "IRISH CREAM TRUFFLE", "DARK CHOCOLATE CANDY CANE TRUFFLE",
-            "WHITE EURO TRUFFLE", "WHITE RUSSIAN TRUFFLE",
-            "CHOCOLATE MILKSHAKE TRUFFLE", "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE",
-            "MILK CHOCOLATE RASPBERRY CREAM", "DARK HIMALAYAN SEA SALT CARAMEL", "MILK CHOCOLATE ORANGE CREAM",
-            "DARK CHOCOLATE MAPLE PECAN CREAM", "ITALIAN ESPRESSO TRUFFLE",
-            "DARK CHOCOLATE CARAMEL", "FRESH MINT TRUFFLE",
-            "DARK CREAM MINT", "MILK SEA SALT CARAMEL", "MILK CHOCOLATE PECAN CARAMEL",
-            "MILK VANILLA DREAM", "FRENCH VANILLA \"B\"",
-            "MILK CHOCOLATE ENGLISH ALMOND TOFFEE", "DARK CHOCOLATE ENGLISH ALMOND TOFFEE"
-        ];
+        let currentActiveRowId = null;
 
         function init() {
-            const dateInput = document.getElementById('trackingDate');
-            if (!dateInput.value) {
-                const now = new Date();
-                dateInput.value = now.toISOString().split('T')[0];
-            }
-            updateDateDisplay();
+            const d = document.getElementById('trackingDate');
+            if(!d.value) d.value = new Date().toISOString().split('T')[0];
             renderRows(f6List, 'f6Body', 'f6');
             renderRows(f1List, 'f1Body', 'f1');
             loadData();
-        }
-
-        function toggleGuide() {
-            const g = document.getElementById('guide');
-            g.style.display = g.style.display === 'none' ? 'block' : 'none';
         }
 
         function renderRows(list, containerId, prefix) {
@@ -299,88 +106,88 @@
             list.forEach((name, i) => {
                 const id = `${prefix}_${i}`;
                 const tr = document.createElement('tr');
-                const isHalfPlate = prefix === 'f6' && f6HalfPlates.includes(name);
-                if (isHalfPlate) tr.classList.add('half-plate-row');
-
                 tr.innerHTML = `
-                    <td>${name}${isHalfPlate ? '<span class="half-plate-badge">Half Plate</span>' : ''}</td>
-                    <td><input type="number" id="${id}_am" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'am')" oninput="calc('${id}')"></td>
-                    <td><input type="number" id="${id}_refill" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'refill')" oninput="calc('${id}')"></td>
-                    <td><input type="number" id="${id}_pm" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'pm')" oninput="calc('${id}')"></td>
-                    <td id="${id}_sold" class="sold-text">0</td>
-                    <td id="${id}_end" class="end-text">0</td>
+                    <td>
+                        <div class="flavor-cell">
+                            <button class="row-scan-btn" onclick="startRowScan('${id}', '${name}')">📸</button>
+                            <span>${name}</span>
+                        </div>
+                    </td>
+                    <td><input type="number" id="${id}_am" class="count-input" oninput="calc('${id}')"></td>
+                    <td><input type="number" id="${id}_refill" class="count-input" oninput="calc('${id}')"></td>
+                    <td><input type="number" id="${id}_pm" class="count-input" oninput="calc('${id}')"></td>
+                    <td id="${id}_sold">0</td>
                 `;
                 container.appendChild(tr);
             });
         }
 
-        function handleTab(event, prefix, index, col) {
-            if (event.key === "Enter" || event.key === "Tab") {
-                event.preventDefault();
-                const list = prefix === 'f6' ? f6List : f1List;
-                const nextIndex = index + 1;
-                if (nextIndex < list.length) {
-                    const nextInput = document.getElementById(`${prefix}_${nextIndex}_${col}`);
-                    if (nextInput) nextInput.focus();
-                }
+        function startRowScan(id, name) {
+            currentActiveRowId = id;
+            currentActiveFlavorName = name;
+            document.getElementById('cameraInput').click();
+        }
+
+        async function handleImage(event) {
+            const file = event.target.files[0];
+            if (!file || !currentActiveRowId) return;
+
+            document.getElementById('aiStatus').style.display = 'block';
+            document.getElementById('aiStatus').textContent = `Identifying ${currentActiveFlavorName}...`;
+
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64Image = reader.result.split(',')[1];
+                await callAI(base64Image);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function callAI(base64Data) {
+            const API_KEY = "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"; // PASTE KEY HERE
+            
+            try {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        "model": "nvidia/nemotron-nano-12b-v2-vl:free",
+                        "messages": [{
+                            "role": "user",
+                            "content": [
+                                { "type": "text", "text": `Count the number of ${currentActiveFlavorName} pieces in this tray image. Return ONLY the number as a plain integer. If none are found, return 0.` },
+                                { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Data}` } }
+                            ]
+                        }]
+                    })
+                });
+                const result = await response.json();
+                const count = parseInt(result.choices[0].message.content.trim()) || 0;
+                
+                document.getElementById(`${currentActiveRowId}_am`).value = count;
+                calc(currentActiveRowId);
+                showToast(`Found ${count} ${currentActiveFlavorName}`);
+            } catch (e) {
+                alert("AI error. Check your API key.");
+            } finally {
+                document.getElementById('aiStatus').style.display = 'none';
             }
         }
 
         function calc(id) {
-            const amInput = document.getElementById(`${id}_am`);
-            if (!amInput) return;
-
-            const am = parseInt(amInput.value) || 0;
-            const ref = parseInt(document.getElementById(`${id}_refill`).value) || 0;
-            const pmInput = document.getElementById(`${id}_pm`);
-            const pmVal = pmInput.value;
+            const am = parseInt(document.getElementById(`${id}_am`).value) || 0;
+            const pmVal = document.getElementById(`${id}_pm`).value;
             const pm = parseInt(pmVal) || 0;
-
-            const endEl = document.getElementById(`${id}_end`);
             const soldEl = document.getElementById(`${id}_sold`);
-
-            if (pmVal !== "") {
-                const sold = Math.max(0, am - pm);
-                soldEl.textContent = sold;
-                endEl.textContent = pm + ref;
-            } else {
-                soldEl.textContent = "0";
-                endEl.textContent = am + ref;
-            }
-
-            const currentEnd = parseInt(endEl.textContent);
-            if (currentEnd > 0 && currentEnd < 5) endEl.classList.add('low-stock');
-            else endEl.classList.remove('low-stock');
-
+            if (pmVal !== "") { soldEl.textContent = Math.max(0, am - pm); }
             updateTotals();
             saveData();
         }
 
         function updateTotals() {
-            const sum = (prefix, list) => list.reduce((acc, _, i) => {
-                const el = document.getElementById(`${prefix}_${i}_end`);
-                return acc + (el ? (parseInt(el.textContent) || 0) : 0);
-            }, 0);
-            const f6 = sum('f6', f6List);
-            const f1 = sum('f1', f1List);
-            document.getElementById('total-f6').textContent = f6;
-            document.getElementById('total-f1').textContent = f1;
-            document.getElementById('total-grand').textContent = f6 + f1;
-            updateTopSellers();
-        }
-
-        function updateTopSellers() {
-            const sales = {};
-            const tally = (list, prefix) => list.forEach((name, i) => {
-                const el = document.getElementById(`${prefix}_${i}_sold`);
-                const s = el ? (parseInt(el.textContent) || 0) : 0;
-                if (s > 0) sales[name] = (sales[name] || 0) + s;
-            });
-            tally(f6List, 'f6'); tally(f1List, 'f1');
-            const sorted = Object.entries(sales).sort((a,b) => b[1]-a[1]).slice(0,5);
-            document.getElementById('topSellersList').innerHTML = sorted.length ? sorted.map(([n,c],i) => `
-                <div class="seller-badge"><span>#${i+1}</span> ${n} <span class="seller-count">${c}</span></div>
-            `).join('') : '<div class="seller-badge" style="opacity: 0.5;">Waiting for sales data...</div>';
+            let total = 0;
+            document.querySelectorAll('input[id$="_am"]').forEach(i => total += (parseInt(i.value) || 0));
+            document.getElementById('total-grand').textContent = total;
         }
 
         function switchFloor(f) {
@@ -390,102 +197,28 @@
             document.getElementById(`btn-${f}`).classList.add('active');
         }
 
-        function updateDateDisplay() {
-            const val = document.getElementById('trackingDate').value;
-            if (!val) return;
-            const d = new Date(val + 'T00:00:00');
-            document.getElementById('displayDate').textContent = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        }
-
-        function lockAM() {
-            document.querySelectorAll('input[id$="_am"]').forEach(i => i.disabled = true);
-            const b = document.getElementById('lockAmBtn');
-            b.textContent = "AM Locked"; b.disabled = true; b.style.opacity = "0.5";
-            saveData();
-            showToast("Morning counts locked.");
-        }
-
-        function confirmReset() {
-            if (window.confirm("Clear all data for today?")) {
-                localStorage.removeItem('biss_truffle_full_v2');
-                location.reload();
-            }
-        }
+        function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 2000); }
 
         function saveData() {
-            const map = (list, prefix) => list.map((_, i) => ({
-                am: document.getElementById(`${prefix}_${i}_am`)?.value || "",
-                ref: document.getElementById(`${prefix}_${i}_refill`)?.value || "",
-                pm: document.getElementById(`${prefix}_${i}_pm`)?.value || ""
-            }));
             const data = {
-                date: document.getElementById('trackingDate').value,
-                oMod: document.getElementById('openingMod').value,
-                cMod: document.getElementById('closingMod').value,
-                amLocked: document.getElementById('lockAmBtn').disabled,
-                f6: map(f6List, 'f6'), f1: map(f1List, 'f1')
+                f6: f6List.map((_, i) => ({ am: document.getElementById(`f6_${i}_am`).value, pm: document.getElementById(`f6_${i}_pm`).value })),
+                f1: f1List.map((_, i) => ({ am: document.getElementById(`f1_${i}_am`).value, pm: document.getElementById(`f1_${i}_pm`).value }))
             };
-            localStorage.setItem('biss_truffle_full_v2', JSON.stringify(data));
+            localStorage.setItem('biss_lab_v2', JSON.stringify(data));
         }
 
         function loadData() {
-            const raw = localStorage.getItem('biss_truffle_full_v2');
+            const raw = localStorage.getItem('biss_lab_v2');
             if (!raw) return;
             const d = JSON.parse(raw);
-            document.getElementById('trackingDate').value = d.date;
-            document.getElementById('openingMod').value = d.oMod;
-            document.getElementById('closingMod').value = d.cMod;
-            
             const fill = (list, prefix, arr) => list.forEach((_, i) => {
-                const id = `${prefix}_${i}`;
-                const amIn = document.getElementById(`${id}_am`);
-                const refIn = document.getElementById(`${id}_refill`);
-                const pmIn = document.getElementById(`${id}_pm`);
-                
-                if (arr && arr[i]) {
-                    if(amIn) amIn.value = arr[i].am;
-                    if(refIn) refIn.value = arr[i].ref;
-                    if(pmIn) pmIn.value = arr[i].pm;
+                if(arr[i]) { 
+                    document.getElementById(`${prefix}_${i}_am`).value = arr[i].am; 
+                    document.getElementById(`${prefix}_${i}_pm`).value = arr[i].pm;
+                    calc(`${prefix}_${i}`);
                 }
-                if (d.amLocked && amIn) amIn.disabled = true;
-                calc(id);
             });
             fill(f6List, 'f6', d.f6); fill(f1List, 'f1', d.f1);
-            if (d.amLocked) {
-                const b = document.getElementById('lockAmBtn');
-                b.textContent = "AM Locked"; b.disabled = true; b.style.opacity = "0.5";
-            }
-            updateDateDisplay();
-        }
-
-        function openReport() { document.getElementById('reportModal').style.display = 'flex'; }
-        function closeReport() { document.getElementById('reportModal').style.display = 'none'; }
-        function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 2500); }
-
-        function generateReport(type) {
-            const date = document.getElementById('displayDate').textContent;
-            const mod = document.getElementById(type === 'am' ? 'openingMod' : 'closingMod').value || 'N/A';
-            let report = `BISSINGER'S ${type.toUpperCase()} REPORT\nDate: ${date}\nMOD: ${mod}\n\n`;
-
-            const section = (title, list, prefix) => {
-                report += `--- ${title} FLOOR ---\n`;
-                list.forEach((name, i) => {
-                    const id = `${prefix}_${i}`;
-                    const am = document.getElementById(`${id}_am`)?.value || 0;
-                    const pm = document.getElementById(`${id}_pm`)?.value || 0;
-                    const sold = document.getElementById(`${id}_sold`)?.textContent || 0;
-                    if (type === 'am' && am > 0) report += `${name}: AM ${am}\n`;
-                    if (type === 'pm' && (pm > 0 || sold > 0)) report += `${name}: Sold ${sold} | End ${pm}\n`;
-                });
-                report += `\n`;
-            };
-
-            section("6TH", f6List, "f6"); section("1ST", f1List, "f1");
-            
-            navigator.clipboard.writeText(report).then(() => {
-                closeReport();
-                showToast("Report copied!");
-            });
         }
     </script>
 </body>
