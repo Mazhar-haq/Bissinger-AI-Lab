@@ -13,18 +13,18 @@
             --ai-purple: #7b2cbf;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Optima', 'Palatino', serif; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 150px; }
+        body { font-family: 'serif'; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 150px; }
         .header { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--bissingers-gold); margin-bottom: 10px; }
         #aiStatus { display: none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: var(--ai-purple); color: white; padding: 10px 20px; border-radius: 20px; z-index: 10000; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 0.8rem; }
         .card { background: var(--white); padding: 12px; border-radius: 4px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .floor-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
-        .tab-btn { flex: 1; padding: 12px; background: #ddd; border: none; border-radius: 4px; font-weight: bold; font-size: 0.7rem; }
+        .tab-btn { flex: 1; padding: 12px; background: #ddd; border: none; border-radius: 4px; font-weight: bold; font-size: 0.7rem; cursor: pointer; }
         .tab-btn.active { background: var(--bissingers-brown); color: var(--bissingers-gold); }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { background: var(--bissingers-brown); color: var(--bissingers-gold); font-size: 0.6rem; padding: 8px 2px; text-transform: uppercase; }
-        td { padding: 6px 2px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.8rem; overflow: hidden; }
+        td { padding: 6px 2px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.8rem; }
         .flavor-cell { text-align: left; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 0.7rem; }
-        .row-scan-btn { background: var(--ai-purple); color: white; border: none; border-radius: 4px; padding: 4px 6px; font-size: 0.8rem; cursor: pointer; }
+        .row-scan-btn { background: var(--ai-purple); color: white; border: none; border-radius: 4px; padding: 6px 8px; font-size: 0.9rem; cursor: pointer; }
         .count-input { width: 100%; text-align: center; padding: 4px 0; border: 1px solid #ccc; border-radius: 2px; }
         .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; text-align: center; }
         .floor-view { display: none; }
@@ -34,12 +34,12 @@
 </head>
 <body onload="init()">
 
-    <div id="aiStatus">🧠 AI is identifying truffles...</div>
+    <div id="aiStatus">🧠 Processing...</div>
     <div id="toast" class="toast">Done</div>
 
     <div class="header">
         <h1>Bissinger's Precision Lab</h1>
-        <input type="date" id="trackingDate" style="background: none; border: none; color: white; font-family: inherit;" onchange="saveData()">
+        <input type="date" id="trackingDate" style="background: none; border: none; color: white;" onchange="saveData()">
     </div>
 
     <div class="floor-tabs">
@@ -72,11 +72,11 @@
     </div>
 
     <div class="summary-footer">
-        <div style="font-size: 0.7rem;">TOTAL PIECES</div>
+        <div style="font-size: 0.7rem;">TOTAL PIECES (AM)</div>
         <div id="total-grand" style="font-size: 1.5rem; font-weight: bold;">0</div>
     </div>
 
-   <script>
+    <script>
         const f6List = ["BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE", "TIRAMISU TRUFFLE", "DARK SEA SALT CARAMEL TRUFFLE", "RED VELVET CAKE TRUFFLE", "IRISH CREAM TRUFFLE", "CHOCOLATE SOUFFLÉ TRUFFLE", "WHITE EURO TRUFFLE", "DARK HIMALAYAN SEA SALT CARAMEL", "DARK CHOCOLATE CARAMEL", "FRESH MINT TRUFFLE", "MILK SEA SALT CARAMEL", "MILK CHOCOLATE PECAN CARAMEL"];
         const f1List = ["BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "WHITE EURO TRUFFLE", "FRESH MINT TRUFFLE", "PISTACHIO CROWN TRUFFLE"];
 
@@ -122,36 +122,28 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // 1. Show Status Immediately
             const status = document.getElementById('aiStatus');
             status.style.display = 'block';
-            status.textContent = `Scanning ${currentActiveFlavorName}...`;
+            status.textContent = `Reading ${currentActiveFlavorName}...`;
 
-            try {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = async (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = async () => {
-                        // 2. Resize to prevent "413 Payload Too Large" errors
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 800;
-                        const scale = MAX_WIDTH / img.width;
-                        canvas.width = MAX_WIDTH;
-                        canvas.height = img.height * scale;
-                        
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        
-                        const base64Data = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-                        await callAI(base64Data);
-                    };
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scale = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+                    callAI(base64Data);
                 };
-            } catch (err) {
-                alert("Upload failed: " + err.message);
-                status.style.display = 'none';
-            }
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         async function callAI(base64Data) {
@@ -161,16 +153,14 @@
                     method: "POST",
                     headers: { 
                         "Authorization": `Bearer ${API_KEY}`, 
-                        "Content-Type": "application/json",
-                        "HTTP-Referer": "https://mazhar-haq.github.io/", 
-                        "X-Title": "Bissinger Tracker Lab"
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
                         "model": "google/gemini-2.0-flash-lite-preview-02-05:free",
                         "messages": [{
                             "role": "user",
                             "content": [
-                                { "type": "text", "text": `Count how many ${currentActiveFlavorName} pieces are in the tray. ONLY return the number.` },
+                                { "type": "text", "text": `Count the number of ${currentActiveFlavorName} pieces in the image. Return only the number.` },
                                 { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Data}` } }
                             ]
                         }]
@@ -178,15 +168,16 @@
                 });
 
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.error?.message || "AI Busy");
+                if (!response.ok) throw new Error(result.error?.message || "AI Offline");
 
-                const count = parseInt(result.choices[0].message.content.replace(/[^0-9]/g, '')) || 0;
+                const text = result.choices[0].message.content;
+                const count = parseInt(text.replace(/[^0-9]/g, '')) || 0;
                 
                 document.getElementById(`${currentActiveRowId}_am`).value = count;
                 calc(currentActiveRowId);
-                showToast(`Success: ${count} detected`);
+                showToast(`Detected ${count} pieces`);
             } catch (e) {
-                alert("AI Error: " + e.message);
+                alert("Scan Error: " + e.message);
             } finally {
                 document.getElementById('aiStatus').style.display = 'none';
                 document.getElementById('cameraInput').value = ""; 
@@ -224,7 +215,7 @@
             const t = document.getElementById('toast'); 
             t.textContent = m; 
             t.style.opacity = 1; 
-            setTimeout(()=>t.style.opacity=0, 3000); 
+            setTimeout(() => t.style.opacity = 0, 3000); 
         }
 
         function saveData() {
@@ -232,21 +223,23 @@
                 f6: f6List.map((_, i) => ({ am: document.getElementById(`f6_${i}_am`).value, refill: document.getElementById(`f6_${i}_refill`).value, pm: document.getElementById(`f6_${i}_pm`).value })),
                 f1: f1List.map((_, i) => ({ am: document.getElementById(`f1_${i}_am`).value, refill: document.getElementById(`f1_${i}_refill`).value, pm: document.getElementById(`f1_${i}_pm`).value }))
             };
-            localStorage.setItem('biss_lab_v2', JSON.stringify(data));
+            localStorage.setItem('biss_lab_v3', JSON.stringify(data));
         }
 
         function loadData() {
-            const raw = localStorage.getItem('biss_lab_v2');
+            const raw = localStorage.getItem('biss_lab_v3');
             if (!raw) return;
             const d = JSON.parse(raw);
             const fill = (list, prefix, arr) => list.forEach((_, i) => {
                 if(arr && arr[i]) { 
-                    document.getElementById(`${prefix}_${i}_am`).value = arr[i].am; 
-                    document.getElementById(`${prefix}_${i}_refill`).value = arr[i].refill || 0;
-                    document.getElementById(`${prefix}_${i}_pm`).value = arr[i].pm;
+                    document.getElementById(`${prefix}_${i}_am`).value = arr[i].am || ""; 
+                    document.getElementById(`${prefix}_${i}_refill`).value = arr[i].refill || "";
+                    document.getElementById(`${prefix}_${i}_pm`).value = arr[i].pm || "";
                     calc(`${prefix}_${i}`);
                 }
             });
             fill(f6List, 'f6', d.f6); fill(f1List, 'f1', d.f1);
         }
     </script>
+</body>
+</html>
