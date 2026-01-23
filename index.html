@@ -1,245 +1,630 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bissinger's AI Lab - Precision Scanner</title>
-    <style>
-        :root {
-            --bissingers-brown: #3d2b1f; 
-            --bissingers-gold: #c5a059;  
-            --light: #f4eee8;
-            --white: #ffffff;
-            --ai-purple: #7b2cbf;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'serif'; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 150px; }
-        .header { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; border-radius: 4px; text-align: center; border-bottom: 3px solid var(--bissingers-gold); margin-bottom: 10px; }
-        #aiStatus { display: none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: var(--ai-purple); color: white; padding: 10px 20px; border-radius: 20px; z-index: 10000; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 0.8rem; }
-        .card { background: var(--white); padding: 12px; border-radius: 4px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .floor-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
-        .tab-btn { flex: 1; padding: 12px; background: #ddd; border: none; border-radius: 4px; font-weight: bold; font-size: 0.7rem; cursor: pointer; }
-        .tab-btn.active { background: var(--bissingers-brown); color: var(--bissingers-gold); }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { background: var(--bissingers-brown); color: var(--bissingers-gold); font-size: 0.6rem; padding: 8px 2px; text-transform: uppercase; }
-        td { padding: 6px 2px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.8rem; }
-        .flavor-cell { text-align: left; font-weight: bold; display: flex; align-items: center; gap: 4px; font-size: 0.7rem; }
-        .row-scan-btn { background: var(--ai-purple); color: white; border: none; border-radius: 4px; padding: 6px 8px; font-size: 0.9rem; cursor: pointer; }
-        .count-input { width: 100%; text-align: center; padding: 4px 0; border: 1px solid #ccc; border-radius: 2px; }
-        .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; text-align: center; }
-        .floor-view { display: none; }
-        .floor-view.active { display: block; }
-        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 8px 16px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 10001; }
-    </style>
-</head>
-<body onload="init()">
+import React, { useState, useEffect, useRef } from 'react';
+import { Camera, X, CheckCircle, SkipForward } from 'lucide-react';
 
-    <div id="aiStatus">🧠 Processing...</div>
-    <div id="toast" class="toast">Done</div>
+const TruffleCounterAI = () => {
+  const [currentFloor, setCurrentFloor] = useState('f6');
+  const [trackingDate, setTrackingDate] = useState('');
+  const [openingMod, setOpeningMod] = useState('');
+  const [closingMod, setClosingMod] = useState('');
+  const [amLocked, setAmLocked] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  const [scanningFlavor, setScanningFlavor] = useState(null); // { floor, index, mode }
+  const [analyzing, setAnalyzing] = useState(false);
+  const [currentCount, setCurrentCount] = useState(null);
+  const [toast, setToast] = useState('');
+  const fileInputRef = useRef(null);
 
-    <div class="header">
-        <h1>Bissinger's Precision Lab</h1>
-        <input type="date" id="trackingDate" style="background: none; border: none; color: white;" onchange="saveData()">
-    </div>
+  const f6List = [
+    "BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE", 
+    "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE", "ROOT BEER FLOAT TRUFFLE", "STRAWBERRY CHEESECAKE TRUFFLE", 
+    "CRÈME BRÛLÉE TRUFFLE", "TIRAMISU TRUFFLE", "DARK SEA SALT CARAMEL TRUFFLE", 
+    "RED VELVET CAKE TRUFFLE", "IRISH CREAM TRUFFLE", "DARK CHOCOLATE CANDY CANE TRUFFLE", 
+    "CHOCOLATE SOUFFLÉ TRUFFLE", "WHITE EURO TRUFFLE", "WHITE RUSSIAN TRUFFLE", 
+    "CHOCOLATE MILKSHAKE TRUFFLE", "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", 
+    "DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE", "GERMAN CHOCOLATE TRUFFLE", 
+    "RASPBERRY CARAMEL JEWEL", "MILK SWISS CHOCOLATE TRUFFLE", "DARK SWISS CHOCOLATE TRUFFLE", 
+    "PINEAPPLE UPSIDE DOWN TRUFFLE", "MILK CHOCOLATE RASPBERRY CREAM", 
+    "DARK HIMALAYAN SEA SALT CARAMEL", "MILK CHOCOLATE ORANGE CREAM", "DARK CHOCOLATE MAPLE PECAN CREAM", 
+    "PISTACHIO CROWN TRUFFLE", "ITALIAN ESPRESSO TRUFFLE", "DARK CHOCOLATE CARAMEL", 
+    "FRESH MINT TRUFFLE", "DARK CREAM MINT", "MILK SEA SALT CARAMEL", 
+    "MILK CHOCOLATE PECAN CARAMEL", "DARK CINNAMON ALMOND CARAMEL", "MILK CHOCOLATE SWISS PECAN CREAM", 
+    "MILK VANILLA DREAM", "FRENCH VANILLA \"B\"", "MILK CHOCOLATE ENGLISH ALMOND TOFFEE", 
+    "DARK CHOCOLATE ENGLISH ALMOND TOFFEE", "LEMON TEARDROP TRUFFLE"
+  ];
 
-    <div class="floor-tabs">
-        <button class="tab-btn active" id="btn-f6" onclick="switchFloor('f6')">6th Floor</button>
-        <button class="tab-btn" id="btn-f1" onclick="switchFloor('f1')">1st Floor</button>
-    </div>
+  const f1List = [
+    "BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "WHITE EURO TRUFFLE", 
+    "DARK CHOCOLATE SEA SALT CARAMEL TRUFFLE", "MILK CHOCOLATE TIRAMISU TRUFFLE",
+    "FRESH MINT TRUFFLE", "DARK CHOCOLATE FRENCH VANILLA \"B\"", 
+    "DARK CHOCOLATE RASPBERRY CARAMEL JEWEL", "PISTACHIO CROWN TRUFFLE", 
+    "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", "MILK CHOCOLATE FRENCH SEA SALT CARAMEL", 
+    "MILK CHOCOLATE SWISS PECAN CREAM"
+  ];
 
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImage(event)">
+  const f6HalfPlates = [
+    "WEDDING CAKE TRUFFLE", "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE",
+    "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE", "IRISH CREAM TRUFFLE", 
+    "DARK CHOCOLATE CANDY CANE TRUFFLE", "WHITE EURO TRUFFLE", "WHITE RUSSIAN TRUFFLE",
+    "CHOCOLATE MILKSHAKE TRUFFLE", "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE",
+    "MILK CHOCOLATE RASPBERRY CREAM", "DARK HIMALAYAN SEA SALT CARAMEL", 
+    "MILK CHOCOLATE ORANGE CREAM", "DARK CHOCOLATE MAPLE PECAN CREAM", 
+    "ITALIAN ESPRESSO TRUFFLE", "DARK CHOCOLATE CARAMEL", "FRESH MINT TRUFFLE",
+    "DARK CREAM MINT", "MILK SEA SALT CARAMEL", "MILK CHOCOLATE PECAN CARAMEL",
+    "MILK VANILLA DREAM", "FRENCH VANILLA \"B\"", "MILK CHOCOLATE ENGLISH ALMOND TOFFEE", 
+    "DARK CHOCOLATE ENGLISH ALMOND TOFFEE"
+  ];
 
-    <div id="f6-view" class="floor-view active">
-        <div class="card">
-            <table>
-                <thead>
-                    <tr><th style="width: 45%;">Flavor</th><th style="width: 15%;">AM</th><th style="width: 15%;">Refill</th><th style="width: 15%;">PM</th><th style="width: 10%;">Sold</th></tr>
-                </thead>
-                <tbody id="f6Body"></tbody>
-            </table>
-        </div>
-    </div>
+  const [f6Data, setF6Data] = useState(f6List.map(() => ({ am: '', refill: '', pm: '' })));
+  const [f1Data, setF1Data] = useState(f1List.map(() => ({ am: '', refill: '', pm: '' })));
 
-    <div id="f1-view" class="floor-view">
-        <div class="card">
-            <table>
-                <thead>
-                    <tr><th style="width: 45%;">Flavor</th><th style="width: 15%;">AM</th><th style="width: 15%;">Refill</th><th style="width: 15%;">PM</th><th style="width: 10%;">Sold</th></tr>
-                </thead>
-                <tbody id="f1Body"></tbody>
-            </table>
-        </div>
-    </div>
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setTrackingDate(today);
+    loadData();
+  }, []);
 
-    <div class="summary-footer">
-        <div style="font-size: 0.7rem;">TOTAL PIECES (AM)</div>
-        <div id="total-grand" style="font-size: 1.5rem; font-weight: bold;">0</div>
-    </div>
+  const loadData = () => {
+    const saved = localStorage.getItem('biss_truffle_ai_v1');
+    if (saved) {
+      const data = JSON.parse(saved);
+      setTrackingDate(data.date);
+      setOpeningMod(data.oMod);
+      setClosingMod(data.cMod);
+      setAmLocked(data.amLocked);
+      setF6Data(data.f6);
+      setF1Data(data.f1);
+    }
+  };
 
-    <script>
-        const f6List = ["BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE", "TIRAMISU TRUFFLE", "DARK SEA SALT CARAMEL TRUFFLE", "RED VELVET CAKE TRUFFLE", "IRISH CREAM TRUFFLE", "CHOCOLATE SOUFFLÉ TRUFFLE", "WHITE EURO TRUFFLE", "DARK HIMALAYAN SEA SALT CARAMEL", "DARK CHOCOLATE CARAMEL", "FRESH MINT TRUFFLE", "MILK SEA SALT CARAMEL", "MILK CHOCOLATE PECAN CARAMEL"];
-        const f1List = ["BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "WHITE EURO TRUFFLE", "FRESH MINT TRUFFLE", "PISTACHIO CROWN TRUFFLE"];
+  const saveData = () => {
+    const data = {
+      date: trackingDate,
+      oMod: openingMod,
+      cMod: closingMod,
+      amLocked,
+      f6: f6Data,
+      f1: f1Data
+    };
+    localStorage.setItem('biss_truffle_ai_v1', JSON.stringify(data));
+  };
 
-        let currentActiveRowId = null;
-        let currentActiveFlavorName = "";
+  useEffect(() => {
+    saveData();
+  }, [f6Data, f1Data, trackingDate, openingMod, closingMod, amLocked]);
 
-        function init() {
-            const d = document.getElementById('trackingDate');
-            if(!d.value) d.value = new Date().toISOString().split('T')[0];
-            renderRows(f6List, 'f6Body', 'f6');
-            renderRows(f1List, 'f1Body', 'f1');
-            loadData();
-        }
+  const updateCount = (floor, index, field, value) => {
+    const setter = floor === 'f6' ? setF6Data : setF1Data;
+    setter(prev => {
+      const newData = [...prev];
+      newData[index] = { ...newData[index], [field]: value };
+      return newData;
+    });
+  };
 
-        function renderRows(list, containerId, prefix) {
-            const container = document.getElementById(containerId);
-            list.forEach((name, i) => {
-                const id = `${prefix}_${i}`;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>
-                        <div class="flavor-cell">
-                            <button class="row-scan-btn" onclick="startRowScan('${id}', '${name}')">📸</button>
-                            <span>${name}</span>
-                        </div>
-                    </td>
-                    <td><input type="number" id="${id}_am" class="count-input" oninput="calc('${id}')"></td>
-                    <td><input type="number" id="${id}_refill" class="count-input" oninput="calc('${id}')"></td>
-                    <td><input type="number" id="${id}_pm" class="count-input" oninput="calc('${id}')"></td>
-                    <td id="${id}_sold">0</td>
-                `;
-                container.appendChild(tr);
-            });
-        }
+  const calculateStats = (data) => {
+    return data.map(item => {
+      const am = parseInt(item.am) || 0;
+      const refill = parseInt(item.refill) || 0;
+      const pm = parseInt(item.pm) || 0;
+      const sold = item.pm !== '' ? Math.max(0, am - pm) : 0;
+      const end = item.pm !== '' ? pm + refill : am + refill;
+      return { sold, end };
+    });
+  };
 
-        function startRowScan(id, name) {
-            currentActiveRowId = id;
-            currentActiveFlavorName = name;
-            document.getElementById('cameraInput').click();
-        }
+  const f6Stats = calculateStats(f6Data);
+  const f1Stats = calculateStats(f1Data);
 
-        async function handleImage(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+  const totalF6 = f6Stats.reduce((sum, s) => sum + s.end, 0);
+  const totalF1 = f1Stats.reduce((sum, s) => sum + s.end, 0);
 
-            const status = document.getElementById('aiStatus');
-            status.style.display = 'block';
-            status.textContent = `Reading ${currentActiveFlavorName}...`;
+  const getTopSellers = () => {
+    const sales = {};
+    f6List.forEach((name, i) => {
+      if (f6Stats[i].sold > 0) sales[name] = (sales[name] || 0) + f6Stats[i].sold;
+    });
+    f1List.forEach((name, i) => {
+      if (f1Stats[i].sold > 0) sales[name] = (sales[name] || 0) + f1Stats[i].sold;
+    });
+    return Object.entries(sales).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  };
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
-                    const scale = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scale;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    const base64Data = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-                    callAI(base64Data);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
+  const topSellers = getTopSellers();
 
-        async function callAI(base64Data) {
-            const API_KEY = "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"; 
-            try {
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: { 
-                        "Authorization": `Bearer ${API_KEY}`, 
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        "model": "google/gemini-2.0-flash-lite-preview-02-05:free",
-                        "messages": [{
-                            "role": "user",
-                            "content": [
-                                { "type": "text", "text": `Count the number of ${currentActiveFlavorName} pieces in the image. Return only the number.` },
-                                { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64Data}` } }
-                            ]
-                        }]
-                    })
-                });
+  const showToast = (message) => {
+    setToast(message);
+    setTimeout(() => setToast(''), 2500);
+  };
 
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.error?.message || "AI Offline");
+  const startScan = (floor, index, mode) => {
+    setScanningFlavor({ floor, index, mode });
+    setCurrentCount(null);
+    setTimeout(() => fileInputRef.current?.click(), 100);
+  };
 
-                const text = result.choices[0].message.content;
-                const count = parseInt(text.replace(/[^0-9]/g, '')) || 0;
-                
-                document.getElementById(`${currentActiveRowId}_am`).value = count;
-                calc(currentActiveRowId);
-                showToast(`Detected ${count} pieces`);
-            } catch (e) {
-                alert("Scan Error: " + e.message);
-            } finally {
-                document.getElementById('aiStatus').style.display = 'none';
-                document.getElementById('cameraInput').value = ""; 
-            }
-        }
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await analyzeImage(file);
+  };
 
-        function calc(id) {
-            const am = parseInt(document.getElementById(`${id}_am`).value) || 0;
-            const refill = parseInt(document.getElementById(`${id}_refill`).value) || 0;
-            const pmVal = document.getElementById(`${id}_pm`).value;
-            const pm = parseInt(pmVal) || 0;
-            const soldEl = document.getElementById(`${id}_sold`);
-            
-            if (pmVal !== "") { 
-                soldEl.textContent = Math.max(0, (am + refill) - pm); 
-            }
-            updateTotals();
-            saveData();
-        }
+  const analyzeImage = async (file) => {
+    setAnalyzing(true);
 
-        function updateTotals() {
-            let total = 0;
-            document.querySelectorAll('input[id$="_am"]').forEach(i => total += (parseInt(i.value) || 0));
-            document.getElementById('total-grand').textContent = total;
-        }
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-        function switchFloor(f) {
-            document.querySelectorAll('.floor-view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`${f}-view`).classList.add('active');
-            document.getElementById(`btn-${f}`).classList.add('active');
-        }
+      const list = scanningFlavor.floor === 'f6' ? f6List : f1List;
+      const flavorName = list[scanningFlavor.index];
+      
+      const prompt = `You are counting truffles on a single plate/section in a display case at Bissinger's chocolates.
 
-        function showToast(m) { 
-            const t = document.getElementById('toast'); 
-            t.textContent = m; 
-            t.style.opacity = 1; 
-            setTimeout(() => t.style.opacity = 0, 3000); 
-        }
+This photo should show: ${flavorName}
 
-        function saveData() {
-            const data = {
-                f6: f6List.map((_, i) => ({ am: document.getElementById(`f6_${i}_am`).value, refill: document.getElementById(`f6_${i}_refill`).value, pm: document.getElementById(`f6_${i}_pm`).value })),
-                f1: f1List.map((_, i) => ({ am: document.getElementById(`f1_${i}_am`).value, refill: document.getElementById(`f1_${i}_refill`).value, pm: document.getElementById(`f1_${i}_pm`).value }))
-            };
-            localStorage.setItem('biss_lab_v3', JSON.stringify(data));
-        }
+Count ONLY the visible truffles on this plate. Look carefully at the entire plate surface.
 
-        function loadData() {
-            const raw = localStorage.getItem('biss_lab_v3');
-            if (!raw) return;
-            const d = JSON.parse(raw);
-            const fill = (list, prefix, arr) => list.forEach((_, i) => {
-                if(arr && arr[i]) { 
-                    document.getElementById(`${prefix}_${i}_am`).value = arr[i].am || ""; 
-                    document.getElementById(`${prefix}_${i}_refill`).value = arr[i].refill || "";
-                    document.getElementById(`${prefix}_${i}_pm`).value = arr[i].pm || "";
-                    calc(`${prefix}_${i}`);
+IMPORTANT: Return ONLY a JSON object (no markdown formatting, no backticks, no explanations):
+{
+  "count": <number>,
+  "confidence": "high" or "medium" or "low",
+  "notes": "brief description of what you see"
+}
+
+If the image is unclear or you cannot see truffles, set count to 0 and confidence to "low".`;
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "image",
+                  source: {
+                    type: "base64",
+                    media_type: file.type,
+                    data: base64
+                  }
+                },
+                {
+                  type: "text",
+                  text: prompt
                 }
-            });
-            fill(f6List, 'f6', d.f6); fill(f1List, 'f1', d.f1);
-        }
-    </script>
-</body>
-</html>
+              ]
+            }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      const textContent = data.content.find(c => c.type === 'text')?.text || '';
+      
+      let jsonText = textContent.trim();
+      const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[0];
+      }
+      
+      const result = JSON.parse(jsonText);
+      setCurrentCount(result);
+
+    } catch (error) {
+      console.error('Analysis error:', error);
+      setCurrentCount({
+        count: 0,
+        confidence: "low",
+        notes: "Error analyzing image. Please try again."
+      });
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const acceptCount = () => {
+    if (currentCount && scanningFlavor) {
+      updateCount(
+        scanningFlavor.floor,
+        scanningFlavor.index,
+        scanningFlavor.mode,
+        currentCount.count.toString()
+      );
+      showToast(`Count saved: ${currentCount.count}`);
+      setScanningFlavor(null);
+      setCurrentCount(null);
+    }
+  };
+
+  const cancelScan = () => {
+    setScanningFlavor(null);
+    setCurrentCount(null);
+  };
+
+  const updateDateDisplay = () => {
+    return new Date(trackingDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const renderTable = (list, data, stats, prefix) => (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[700px]">
+        <thead>
+          <tr style={{ background: '#3d2b1f', color: '#c5a059' }}>
+            <th className="p-2 text-[10px] uppercase text-left w-[30%]">Flavor</th>
+            <th className="p-2 text-[10px] uppercase">AM</th>
+            <th className="p-2 text-[10px] uppercase">Refill</th>
+            <th className="p-2 text-[10px] uppercase">PM</th>
+            <th className="p-2 text-[10px] uppercase">Sold</th>
+            <th className="p-2 text-[10px] uppercase">End</th>
+            <th className="p-2 text-[10px] uppercase w-[15%]">Scan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {list.map((name, i) => {
+            const isHalfPlate = prefix === 'f6' && f6HalfPlates.includes(name);
+            const isLowStock = stats[i].end > 0 && stats[i].end < 5;
+            
+            return (
+              <tr key={i} style={{ background: isHalfPlate ? '#fffbf0' : 'white' }}>
+                <td className="p-2 text-xs font-bold uppercase border-b" style={{ borderColor: '#f0f0f0' }}>
+                  {name}
+                  {isHalfPlate && (
+                    <span className="ml-1 text-[10px] px-1 rounded" style={{ background: '#c5a059', color: 'white' }}>
+                      Half Plate
+                    </span>
+                  )}
+                </td>
+                <td className="p-2 border-b text-center" style={{ borderColor: '#f0f0f0' }}>
+                  <input
+                    type="number"
+                    className="w-11 text-center p-1 border rounded text-sm"
+                    style={{ borderColor: '#eee' }}
+                    value={data[i].am}
+                    onChange={(e) => updateCount(prefix, i, 'am', e.target.value)}
+                    disabled={amLocked}
+                  />
+                </td>
+                <td className="p-2 border-b text-center" style={{ borderColor: '#f0f0f0' }}>
+                  <input
+                    type="number"
+                    className="w-11 text-center p-1 border rounded text-sm"
+                    style={{ borderColor: '#eee' }}
+                    value={data[i].refill}
+                    onChange={(e) => updateCount(prefix, i, 'refill', e.target.value)}
+                  />
+                </td>
+                <td className="p-2 border-b text-center" style={{ borderColor: '#f0f0f0' }}>
+                  <input
+                    type="number"
+                    className="w-11 text-center p-1 border rounded text-sm"
+                    style={{ borderColor: '#eee' }}
+                    value={data[i].pm}
+                    onChange={(e) => updateCount(prefix, i, 'pm', e.target.value)}
+                  />
+                </td>
+                <td className="p-2 border-b text-center text-sm font-bold" style={{ borderColor: '#f0f0f0', color: '#4a6741' }}>
+                  {stats[i].sold}
+                </td>
+                <td className={`p-2 border-b text-center text-sm font-bold ${isLowStock ? 'animate-pulse' : ''}`} style={{ borderColor: '#f0f0f0', color: isLowStock ? '#9e2a2b' : '#000' }}>
+                  {stats[i].end}
+                </td>
+                <td className="p-2 border-b" style={{ borderColor: '#f0f0f0' }}>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => startScan(prefix, i, 'am')}
+                      disabled={amLocked}
+                      className="flex-1 p-1 rounded text-white disabled:opacity-30 flex items-center justify-center"
+                      style={{ background: '#2c3e50', fontSize: '10px' }}
+                      title="Scan AM count"
+                    >
+                      <Camera size={12} />
+                    </button>
+                    <button
+                      onClick={() => startScan(prefix, i, 'pm')}
+                      className="flex-1 p-1 rounded text-white flex items-center justify-center"
+                      style={{ background: '#2c3e50', fontSize: '10px' }}
+                      title="Scan PM count"
+                    >
+                      <Camera size={12} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen pb-64" style={{ background: '#f4eee8', fontFamily: 'Optima, Palatino, Segoe UI, serif', color: '#3d2b1f' }}>
+      
+      {/* Toast */}
+      <div 
+        className="fixed bottom-28 left-1/2 transform -translate-x-1/2 px-5 py-2 rounded transition-opacity z-50 pointer-events-none"
+        style={{ 
+          background: '#3d2b1f', 
+          color: '#c5a059',
+          opacity: toast ? 1 : 0 
+        }}
+      >
+        {toast}
+      </div>
+
+      {/* Header */}
+      <div className="p-5 text-center border-b-2 relative" style={{ background: '#3d2b1f', color: '#c5a059', borderColor: '#c5a059' }}>
+        <button
+          onClick={() => setShowGuide(!showGuide)}
+          className="absolute right-3 top-3 text-xl border-0 cursor-pointer"
+          style={{ background: 'none', color: '#c5a059' }}
+        >
+          📖 Help
+        </button>
+        <h1 className="text-lg uppercase tracking-wide mb-1" style={{ fontWeight: 300, letterSpacing: '1px' }}>
+          Bissinger's Herald Square Truffle Tracker
+        </h1>
+        <p className="text-xs opacity-80">{updateDateDisplay()}</p>
+      </div>
+
+      {/* Guide */}
+      {showGuide && (
+        <div className="m-4 p-4 rounded shadow" style={{ background: 'white' }}>
+          <div className="mb-5 border-l-2 pl-4" style={{ borderColor: '#c5a059' }}>
+            <h3 className="text-sm uppercase mb-2" style={{ color: '#3d2b1f' }}>📸 AI Photo Counter</h3>
+            <p className="text-xs mb-1">Click the camera button next to any flavor to scan that plate.</p>
+            <p className="text-xs mb-1">AI counts the truffles and shows you the result.</p>
+            <p className="text-xs">Accept the count or retake the photo if needed.</p>
+          </div>
+          <button
+            onClick={() => setShowGuide(false)}
+            className="w-full p-2 border-0 rounded cursor-pointer text-xs font-bold"
+            style={{ background: '#3d2b1f', color: '#c5a059' }}
+          >
+            CLOSE GUIDE
+          </button>
+        </div>
+      )}
+
+      {/* Controls */}
+      <div className="m-4 p-4 rounded shadow" style={{ background: 'white' }}>
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div>
+            <label className="block text-xs font-bold uppercase mb-1">Date</label>
+            <input
+              type="date"
+              className="w-full p-2 border rounded text-sm"
+              style={{ borderColor: '#dcdcdc' }}
+              value={trackingDate}
+              onChange={(e) => setTrackingDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold uppercase mb-1">Opening MOD</label>
+            <select
+              className="w-full p-2 border rounded text-sm"
+              style={{ borderColor: '#dcdcdc' }}
+              value={openingMod}
+              onChange={(e) => setOpeningMod(e.target.value)}
+            >
+              <option value="">Select...</option>
+              <option>Arin</option>
+              <option>Czar</option>
+              <option>Faith</option>
+              <option>Gully</option>
+              <option>Associate</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-bold uppercase mb-1">Closing MOD</label>
+            <select
+              className="w-full p-2 border rounded text-sm"
+              style={{ borderColor: '#dcdcdc' }}
+              value={closingMod}
+              onChange={(e) => setClosingMod(e.target.value)}
+            >
+              <option value="">Select...</option>
+              <option>Arin</option>
+              <option>Czar</option>
+              <option>Faith</option>
+              <option>Gully</option>
+              <option>Associate</option>
+            </select>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setAmLocked(true)}
+          disabled={amLocked}
+          className="w-full p-2 border-0 rounded font-bold cursor-pointer disabled:opacity-50"
+          style={{ background: '#c5a059' }}
+        >
+          {amLocked ? 'AM Locked' : 'Lock AM Counts'}
+        </button>
+      </div>
+
+      {/* Floor Tabs */}
+      <div className="flex gap-2 px-4 mb-4 sticky top-0 z-10 py-2" style={{ background: '#f4eee8' }}>
+        <button
+          onClick={() => setCurrentFloor('f6')}
+          className="flex-1 p-3 border-0 rounded font-bold cursor-pointer transition-all"
+          style={{
+            background: currentFloor === 'f6' ? '#3d2b1f' : '#e0dcd8',
+            color: currentFloor === 'f6' ? '#c5a059' : '#666',
+            fontSize: '12px'
+          }}
+        >
+          6th Floor Case
+        </button>
+        <button
+          onClick={() => setCurrentFloor('f1')}
+          className="flex-1 p-3 border-0 rounded font-bold cursor-pointer transition-all"
+          style={{
+            background: currentFloor === 'f1' ? '#3d2b1f' : '#e0dcd8',
+            color: currentFloor === 'f1' ? '#c5a059' : '#666',
+            fontSize: '12px'
+          }}
+        >
+          1st Floor Case
+        </button>
+      </div>
+
+      {/* Tables */}
+      <div className="mx-4 mb-4 rounded shadow p-1" style={{ background: 'white' }}>
+        {currentFloor === 'f6' && renderTable(f6List, f6Data, f6Stats, 'f6')}
+        {currentFloor === 'f1' && renderTable(f1List, f1Data, f1Stats, 'f1')}
+      </div>
+
+      {/* Scan Modal */}
+      {scanningFlavor && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.8)' }}>
+          <div className="rounded-lg p-6 max-w-md w-full" style={{ background: 'white' }}>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="font-bold text-lg">
+                  {scanningFlavor.mode === 'am' ? 'AM Count' : 'PM Count'}
+                </h3>
+                <p className="text-xs" style={{ color: '#666' }}>
+                  {(scanningFlavor.floor === 'f6' ? f6List : f1List)[scanningFlavor.index]}
+                </p>
+              </div>
+              <button onClick={cancelScan} style={{ color: '#666' }}>
+                <X size={24} />
+              </button>
+            </div>
+
+            {analyzing ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#3d2b1f' }}></div>
+                <p className="text-sm" style={{ color: '#666' }}>AI is counting truffles...</p>
+              </div>
+            ) : currentCount ? (
+              <>
+                <div className={`p-4 rounded mb-4 border-2`} style={{
+                  background: currentCount.confidence === 'high' ? '#f0fdf4' : currentCount.confidence === 'medium' ? '#fefce8' : '#fef2f2',
+                  borderColor: currentCount.confidence === 'high' ? '#86efac' : currentCount.confidence === 'medium' ? '#fde047' : '#fca5a5'
+                }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-bold">AI Count:</span>
+                    <span className="text-3xl font-bold">{currentCount.count}</span>
+                  </div>
+                  <p className="text-xs" style={{ color: '#666' }}>{currentCount.notes}</p>
+                  <div className="flex items-center gap-1 mt-2">
+                    <span className="text-xs">Confidence:</span>
+                    <span className={`text-xs font-bold uppercase`} style={{
+                      color: currentCount.confidence === 'high' ? '#16a34a' : currentCount.confidence === 'medium' ? '#ca8a04' : '#dc2626'
+                    }}>
+                      {currentCount.confidence}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={acceptCount}
+                    className="p-3 text-white rounded font-bold flex items-center justify-center gap-2 border-0 cursor-pointer"
+                    style={{ background: '#4a6741' }}
+                  >
+                    <CheckCircle size={20} />
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCurrentCount(null);
+                      setTimeout(() => fileInputRef.current?.click(), 100);
+                    }}
+                    className="p-3 text-white rounded font-bold border-0 cursor-pointer"
+                    style={{ background: '#c5a059' }}
+                  >
+                    Retake Photo
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-center mb-4" style={{ color: '#666' }}>
+                  Take a clear photo of this flavor's plate
+                </p>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full p-4 rounded font-bold flex items-center justify-center gap-2 mb-2 border-0 cursor-pointer"
+                  style={{ background: '#3d2b1f', color: '#c5a059' }}
+                >
+                  <Camera size={20} />
+                  Take Photo
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Summary Footer */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 shadow-lg" style={{ background: '#3d2b1f', color: '#c5a059' }}>
+        <div className="flex justify-around mb-3 pb-3 border-b" style={{ borderColor: 'rgba(197,160,89,0.3)' }}>
+          <div className="text-center">
+            <div className="text-xs">F6 STOCK</div>
+            <div className="text-xl font-bold">{totalF6}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs">F1 STOCK</div>
+            <div className="text-xl font-bold">{totalF1}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-xs">GRAND TOTAL</div>
+            <div className="text-xl font-bold border-b-2" style={{ color: 'white', borderColor: '#c5a059' }}>
+              {totalF6 + totalF1}
+            </div>
+          </div>
+        </div>
+
+        <div className="px-2">
+          <div className="text-xs font-bold mb-2">🏆 TOP SELLERS TODAY</div>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {topSellers.length > 0 ? (
+              topSellers.map(([name, count], i) => (
+                <div
+                  key={i}
+                  className="px-2 py-1 rounded text-xs flex items-center gap-1 border"
+                  style={{ background: 'rgba(255,255,255,0.1)', borderColor: 'rgba(197,160,89,0.2)' }}
+                >
+                  <span>#{i + 1}</span>
+                  <span>{name.slice(0, 20)}...</span>
+                  <span className="font-bold" style={{ color: 'white' }}>{count}</span>
+                </div>
+              ))
+            ) : (
+              <div className="text-xs opacity-50">Enter PM counts to track...</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TruffleCounterAI;
