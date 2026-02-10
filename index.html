@@ -1,630 +1,287 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Camera, X, CheckCircle, SkipForward } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bissinger's Herald Square Truffle Tracker</title>
+    <style>
+        :root {
+            --bissingers-brown: #3d2b1f; 
+            --bissingers-gold: #c5a059;  
+            --bissingers-cream: #f9f6f2;
+            --primary: var(--bissingers-brown);
+            --accent: var(--bissingers-gold);
+            --success: #4a6741;
+            --danger: #9e2a2b;
+            --info: #2c3e50;
+            --light: #f4eee8;
+            --white: #ffffff;
+            --highlight-row-bg: rgba(197, 160, 89, 0.15);
+        }
 
-const TruffleCounterAI = () => {
-  const [currentFloor, setCurrentFloor] = useState('f6');
-  const [trackingDate, setTrackingDate] = useState('');
-  const [openingMod, setOpeningMod] = useState('');
-  const [closingMod, setClosingMod] = useState('');
-  const [amLocked, setAmLocked] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
-  const [scanningFlavor, setScanningFlavor] = useState(null); // { floor, index, mode }
-  const [analyzing, setAnalyzing] = useState(false);
-  const [currentCount, setCurrentCount] = useState(null);
-  const [toast, setToast] = useState('');
-  const fileInputRef = useRef(null);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Optima', 'Palatino', 'Segoe UI', serif; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 280px; }
 
-  const f6List = [
-    "BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE", 
-    "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE", "ROOT BEER FLOAT TRUFFLE", "STRAWBERRY CHEESECAKE TRUFFLE", 
-    "CRÈME BRÛLÉE TRUFFLE", "TIRAMISU TRUFFLE", "DARK SEA SALT CARAMEL TRUFFLE", 
-    "RED VELVET CAKE TRUFFLE", "IRISH CREAM TRUFFLE", "DARK CHOCOLATE CANDY CANE TRUFFLE", 
-    "CHOCOLATE SOUFFLÉ TRUFFLE", "WHITE EURO TRUFFLE", "WHITE RUSSIAN TRUFFLE", 
-    "CHOCOLATE MILKSHAKE TRUFFLE", "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", 
-    "DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE", "GERMAN CHOCOLATE TRUFFLE", 
-    "RASPBERRY CARAMEL JEWEL", "MILK SWISS CHOCOLATE TRUFFLE", "DARK SWISS CHOCOLATE TRUFFLE", 
-    "PINEAPPLE UPSIDE DOWN TRUFFLE", "MILK CHOCOLATE RASPBERRY CREAM", 
-    "DARK HIMALAYAN SEA SALT CARAMEL", "MILK CHOCOLATE ORANGE CREAM", "DARK CHOCOLATE MAPLE PECAN CREAM", 
-    "PISTACHIO CROWN TRUFFLE", "ITALIAN ESPRESSO TRUFFLE", "DARK CHOCOLATE CARAMEL", 
-    "FRESH MINT TRUFFLE", "DARK CREAM MINT", "MILK SEA SALT CARAMEL", 
-    "MILK CHOCOLATE PECAN CARAMEL", "DARK CINNAMON ALMOND CARAMEL", "MILK CHOCOLATE SWISS PECAN CREAM", 
-    "MILK VANILLA DREAM", "FRENCH VANILLA \"B\"", "MILK CHOCOLATE ENGLISH ALMOND TOFFEE", 
-    "DARK CHOCOLATE ENGLISH ALMOND TOFFEE", "LEMON TEARDROP TRUFFLE"
-  ];
+        .header { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 20px 10px; border-radius: 4px; margin-bottom: 15px; text-align: center; border-bottom: 3px solid var(--bissingers-gold); position: relative; }
+        .header h1 { font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 300; margin-bottom: 5px; }
+        
+        .settings-btn { position: absolute; right: 10px; top: 10px; background: none; border: none; color: var(--bissingers-gold); cursor: pointer; font-size: 1.2rem; }
 
-  const f1List = [
-    "BIRTHDAY CAKE TRUFFLE", "WEDDING CAKE TRUFFLE", "WHITE EURO TRUFFLE", 
-    "DARK CHOCOLATE SEA SALT CARAMEL TRUFFLE", "MILK CHOCOLATE TIRAMISU TRUFFLE",
-    "FRESH MINT TRUFFLE", "DARK CHOCOLATE FRENCH VANILLA \"B\"", 
-    "DARK CHOCOLATE RASPBERRY CARAMEL JEWEL", "PISTACHIO CROWN TRUFFLE", 
-    "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE", "MILK CHOCOLATE FRENCH SEA SALT CARAMEL", 
-    "MILK CHOCOLATE SWISS PECAN CREAM"
-  ];
+        .card { background: var(--white); padding: 15px; border-radius: 4px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(61, 43, 31, 0.1); border: 1px solid rgba(197, 160, 89, 0.2); }
+        
+        .guide-section { font-size: 0.8rem; margin-bottom: 20px; border-left: 3px solid var(--bissingers-gold); padding-left: 15px; }
+        .guide-section h3 { font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; color: var(--bissingers-brown); }
 
-  const f6HalfPlates = [
-    "WEDDING CAKE TRUFFLE", "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE",
-    "STRAWBERRY TRUFFLE", "DARK RASPBERRY TRUFFLE", "IRISH CREAM TRUFFLE", 
-    "DARK CHOCOLATE CANDY CANE TRUFFLE", "WHITE EURO TRUFFLE", "WHITE RUSSIAN TRUFFLE",
-    "CHOCOLATE MILKSHAKE TRUFFLE", "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE",
-    "MILK CHOCOLATE RASPBERRY CREAM", "DARK HIMALAYAN SEA SALT CARAMEL", 
-    "MILK CHOCOLATE ORANGE CREAM", "DARK CHOCOLATE MAPLE PECAN CREAM", 
-    "ITALIAN ESPRESSO TRUFFLE", "DARK CHOCOLATE CARAMEL", "FRESH MINT TRUFFLE",
-    "DARK CREAM MINT", "MILK SEA SALT CARAMEL", "MILK CHOCOLATE PECAN CARAMEL",
-    "MILK VANILLA DREAM", "FRENCH VANILLA \"B\"", "MILK CHOCOLATE ENGLISH ALMOND TOFFEE", 
-    "DARK CHOCOLATE ENGLISH ALMOND TOFFEE"
-  ];
+        .input-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 600px) { .input-grid { grid-template-columns: repeat(3, 1fr); } }
+        
+        .input-group { display: flex; flex-direction: column; gap: 4px; }
+        .input-group label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        input, select { padding: 8px; border: 1px solid #dcdcdc; border-radius: 2px; width: 100%; font-size: 0.9rem; }
 
-  const [f6Data, setF6Data] = useState(f6List.map(() => ({ am: '', refill: '', pm: '' })));
-  const [f1Data, setF1Data] = useState(f1List.map(() => ({ am: '', refill: '', pm: '' })));
+        .floor-tabs { display: flex; gap: 8px; margin-bottom: 15px; position: sticky; top: 0; z-index: 100; background: var(--light); padding: 10px 0; }
+        .tab-btn { flex: 1; padding: 12px; background: #e0dcd8; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem; color: #666; transition: 0.3s; }
+        .tab-btn.active { background: var(--bissingers-brown); color: var(--bissingers-gold); }
 
-  useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setTrackingDate(today);
-    loadData();
-  }, []);
+        .floor-view { display: none; }
+        .floor-view.active { display: block; }
 
-  const loadData = () => {
-    const saved = localStorage.getItem('biss_truffle_ai_v1');
-    if (saved) {
-      const data = JSON.parse(saved);
-      setTrackingDate(data.date);
-      setOpeningMod(data.oMod);
-      setClosingMod(data.cMod);
-      setAmLocked(data.amLocked);
-      setF6Data(data.f6);
-      setF1Data(data.f1);
-    }
-  };
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 8px 4px; font-size: 0.6rem; text-transform: uppercase; }
+        td { padding: 8px 4px; border-bottom: 1px solid #f0f0f0; text-align: center; font-size: 0.85rem; transition: background 0.2s; }
+        td:first-child { text-align: left; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; }
+        
+        .highlight-row td {
+            background-color: var(--highlight-row-bg) !important;
+        }
 
-  const saveData = () => {
-    const data = {
-      date: trackingDate,
-      oMod: openingMod,
-      cMod: closingMod,
-      amLocked,
-      f6: f6Data,
-      f1: f1Data
-    };
-    localStorage.setItem('biss_truffle_ai_v1', JSON.stringify(data));
-  };
+        .half-plate-badge { 
+            display: inline-block; 
+            font-size: 10px; 
+            background: var(--bissingers-gold); 
+            color: white; 
+            padding: 1px 4px; 
+            border-radius: 3px; 
+            margin-left: 5px; 
+            vertical-align: middle;
+            text-transform: none;
+            letter-spacing: 0;
+            font-weight: normal;
+        }
 
-  useEffect(() => {
-    saveData();
-  }, [f6Data, f1Data, trackingDate, openingMod, closingMod, amLocked]);
+        .count-input { width: 45px; text-align: center; padding: 4px; border: 1px solid #eee; }
+        .count-input:focus { border-color: var(--bissingers-gold); outline: none; background: #fffcf5; }
+        .count-input:disabled { background: #f9f9f9; color: #999; border: none; }
 
-  const updateCount = (floor, index, field, value) => {
-    const setter = floor === 'f6' ? setF6Data : setF1Data;
-    setter(prev => {
-      const newData = [...prev];
-      newData[index] = { ...newData[index], [field]: value };
-      return newData;
-    });
-  };
+        .sold-text { color: var(--success); font-weight: bold; }
+        .end-text { font-weight: bold; }
+        .low-stock { color: var(--danger); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-  const calculateStats = (data) => {
-    return data.map(item => {
-      const am = parseInt(item.am) || 0;
-      const refill = parseInt(item.refill) || 0;
-      const pm = parseInt(item.pm) || 0;
-      const sold = item.pm !== '' ? Math.max(0, am - pm) : 0;
-      const end = item.pm !== '' ? pm + refill : am + refill;
-      return { sold, end };
-    });
-  };
+        .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.3); }
+        .summary-stats { display: flex; justify-content: space-around; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(197,160,89,0.3); }
+        .summary-item { text-align: center; }
+        .summary-val { font-size: 1.2rem; font-weight: bold; display: block; }
 
-  const f6Stats = calculateStats(f6Data);
-  const f1Stats = calculateStats(f1Data);
+        .top-sellers-panel { display: block; padding: 5px 10px; }
+        .top-sellers-title { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; color: var(--bissingers-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .top-sellers-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .seller-badge { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(197,160,89,0.2); }
+        .seller-count { color: #fff; font-weight: bold; }
 
-  const totalF6 = f6Stats.reduce((sum, s) => sum + s.end, 0);
-  const totalF1 = f1Stats.reduce((sum, s) => sum + s.end, 0);
+        .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 10px 20px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 1001; pointer-events: none; }
 
-  const getTopSellers = () => {
-    const sales = {};
-    f6List.forEach((name, i) => {
-      if (f6Stats[i].sold > 0) sales[name] = (sales[name] || 0) + f6Stats[i].sold;
-    });
-    f1List.forEach((name, i) => {
-      if (f1Stats[i].sold > 0) sales[name] = (sales[name] || 0) + f1Stats[i].sold;
-    });
-    return Object.entries(sales).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  };
+        @media print {
+            .floor-tabs, .summary-footer, .settings-btn, #guide, button { display: none !important; }
+            body { padding: 0; background: white; padding-bottom: 0; }
+            .card { box-shadow: none; border: 1px solid #ccc; }
+            .floor-view { display: block !important; }
+            .highlight-row td { background-color: transparent !important; }
+        }
+    </style>
+</head>
+<body onload="init()">
 
-  const topSellers = getTopSellers();
+    <div id="toast" class="toast">Action Complete</div>
 
-  const showToast = (message) => {
-    setToast(message);
-    setTimeout(() => setToast(''), 2500);
-  };
-
-  const startScan = (floor, index, mode) => {
-    setScanningFlavor({ floor, index, mode });
-    setCurrentCount(null);
-    setTimeout(() => fileInputRef.current?.click(), 100);
-  };
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    await analyzeImage(file);
-  };
-
-  const analyzeImage = async (file) => {
-    setAnalyzing(true);
-
-    try {
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      const list = scanningFlavor.floor === 'f6' ? f6List : f1List;
-      const flavorName = list[scanningFlavor.index];
-      
-      const prompt = `You are counting truffles on a single plate/section in a display case at Bissinger's chocolates.
-
-This photo should show: ${flavorName}
-
-Count ONLY the visible truffles on this plate. Look carefully at the entire plate surface.
-
-IMPORTANT: Return ONLY a JSON object (no markdown formatting, no backticks, no explanations):
-{
-  "count": <number>,
-  "confidence": "high" or "medium" or "low",
-  "notes": "brief description of what you see"
-}
-
-If the image is unclear or you cannot see truffles, set count to 0 and confidence to "low".`;
-
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "image",
-                  source: {
-                    type: "base64",
-                    media_type: file.type,
-                    data: base64
-                  }
-                },
-                {
-                  type: "text",
-                  text: prompt
-                }
-              ]
-            }
-          ]
-        })
-      });
-
-      const data = await response.json();
-      const textContent = data.content.find(c => c.type === 'text')?.text || '';
-      
-      let jsonText = textContent.trim();
-      const jsonMatch = textContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        jsonText = jsonMatch[0];
-      }
-      
-      const result = JSON.parse(jsonText);
-      setCurrentCount(result);
-
-    } catch (error) {
-      console.error('Analysis error:', error);
-      setCurrentCount({
-        count: 0,
-        confidence: "low",
-        notes: "Error analyzing image. Please try again."
-      });
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  const acceptCount = () => {
-    if (currentCount && scanningFlavor) {
-      updateCount(
-        scanningFlavor.floor,
-        scanningFlavor.index,
-        scanningFlavor.mode,
-        currentCount.count.toString()
-      );
-      showToast(`Count saved: ${currentCount.count}`);
-      setScanningFlavor(null);
-      setCurrentCount(null);
-    }
-  };
-
-  const cancelScan = () => {
-    setScanningFlavor(null);
-    setCurrentCount(null);
-  };
-
-  const updateDateDisplay = () => {
-    return new Date(trackingDate).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const renderTable = (list, data, stats, prefix) => (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[700px]">
-        <thead>
-          <tr style={{ background: '#3d2b1f', color: '#c5a059' }}>
-            <th className="p-2 text-[10px] uppercase text-left w-[30%]">Flavor</th>
-            <th className="p-2 text-[10px] uppercase">AM</th>
-            <th className="p-2 text-[10px] uppercase">Refill</th>
-            <th className="p-2 text-[10px] uppercase">PM</th>
-            <th className="p-2 text-[10px] uppercase">Sold</th>
-            <th className="p-2 text-[10px] uppercase">End</th>
-            <th className="p-2 text-[10px] uppercase w-[15%]">Scan</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map((name, i) => {
-            const isHalfPlate = prefix === 'f6' && f6HalfPlates.includes(name);
-            const isLowStock = stats[i].end > 0 && stats[i].end < 5;
-            
-            return (
-              <tr key={i} style={{ background: isHalfPlate ? '#fffbf0' : 'white' }}>
-                <td className="p-2 text-xs font-bold uppercase border-b" style={{ borderColor: '#f0f0f0' }}>
-                  {name}
-                  {isHalfPlate && (
-                    <span className="ml-1 text-[10px] px-1 rounded" style={{ background: '#c5a059', color: 'white' }}>
-                      Half Plate
-                    </span>
-                  )}
-                </td>
-                <td className="p-2 border-b text-center" style={{ borderColor: '#f0f0f0' }}>
-                  <input
-                    type="number"
-                    className="w-11 text-center p-1 border rounded text-sm"
-                    style={{ borderColor: '#eee' }}
-                    value={data[i].am}
-                    onChange={(e) => updateCount(prefix, i, 'am', e.target.value)}
-                    disabled={amLocked}
-                  />
-                </td>
-                <td className="p-2 border-b text-center" style={{ borderColor: '#f0f0f0' }}>
-                  <input
-                    type="number"
-                    className="w-11 text-center p-1 border rounded text-sm"
-                    style={{ borderColor: '#eee' }}
-                    value={data[i].refill}
-                    onChange={(e) => updateCount(prefix, i, 'refill', e.target.value)}
-                  />
-                </td>
-                <td className="p-2 border-b text-center" style={{ borderColor: '#f0f0f0' }}>
-                  <input
-                    type="number"
-                    className="w-11 text-center p-1 border rounded text-sm"
-                    style={{ borderColor: '#eee' }}
-                    value={data[i].pm}
-                    onChange={(e) => updateCount(prefix, i, 'pm', e.target.value)}
-                  />
-                </td>
-                <td className="p-2 border-b text-center text-sm font-bold" style={{ borderColor: '#f0f0f0', color: '#4a6741' }}>
-                  {stats[i].sold}
-                </td>
-                <td className={`p-2 border-b text-center text-sm font-bold ${isLowStock ? 'animate-pulse' : ''}`} style={{ borderColor: '#f0f0f0', color: isLowStock ? '#9e2a2b' : '#000' }}>
-                  {stats[i].end}
-                </td>
-                <td className="p-2 border-b" style={{ borderColor: '#f0f0f0' }}>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => startScan(prefix, i, 'am')}
-                      disabled={amLocked}
-                      className="flex-1 p-1 rounded text-white disabled:opacity-30 flex items-center justify-center"
-                      style={{ background: '#2c3e50', fontSize: '10px' }}
-                      title="Scan AM count"
-                    >
-                      <Camera size={12} />
-                    </button>
-                    <button
-                      onClick={() => startScan(prefix, i, 'pm')}
-                      className="flex-1 p-1 rounded text-white flex items-center justify-center"
-                      style={{ background: '#2c3e50', fontSize: '10px' }}
-                      title="Scan PM count"
-                    >
-                      <Camera size={12} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div class="header">
+        <button class="settings-btn" onclick="toggleGuide()">📖 Help</button>
+        <h1>Bissinger's Truffle Tracker</h1>
+        <p id="displayDate" style="font-size: 0.8rem; opacity: 0.8;"></p>
     </div>
-  );
 
-  return (
-    <div className="min-h-screen pb-64" style={{ background: '#f4eee8', fontFamily: 'Optima, Palatino, Segoe UI, serif', color: '#3d2b1f' }}>
-      
-      {/* Toast */}
-      <div 
-        className="fixed bottom-28 left-1/2 transform -translate-x-1/2 px-5 py-2 rounded transition-opacity z-50 pointer-events-none"
-        style={{ 
-          background: '#3d2b1f', 
-          color: '#c5a059',
-          opacity: toast ? 1 : 0 
-        }}
-      >
-        {toast}
-      </div>
-
-      {/* Header */}
-      <div className="p-5 text-center border-b-2 relative" style={{ background: '#3d2b1f', color: '#c5a059', borderColor: '#c5a059' }}>
-        <button
-          onClick={() => setShowGuide(!showGuide)}
-          className="absolute right-3 top-3 text-xl border-0 cursor-pointer"
-          style={{ background: 'none', color: '#c5a059' }}
-        >
-          📖 Help
-        </button>
-        <h1 className="text-lg uppercase tracking-wide mb-1" style={{ fontWeight: 300, letterSpacing: '1px' }}>
-          Bissinger's Herald Square Truffle Tracker
-        </h1>
-        <p className="text-xs opacity-80">{updateDateDisplay()}</p>
-      </div>
-
-      {/* Guide */}
-      {showGuide && (
-        <div className="m-4 p-4 rounded shadow" style={{ background: 'white' }}>
-          <div className="mb-5 border-l-2 pl-4" style={{ borderColor: '#c5a059' }}>
-            <h3 className="text-sm uppercase mb-2" style={{ color: '#3d2b1f' }}>📸 AI Photo Counter</h3>
-            <p className="text-xs mb-1">Click the camera button next to any flavor to scan that plate.</p>
-            <p className="text-xs mb-1">AI counts the truffles and shows you the result.</p>
-            <p className="text-xs">Accept the count or retake the photo if needed.</p>
-          </div>
-          <button
-            onClick={() => setShowGuide(false)}
-            className="w-full p-2 border-0 rounded cursor-pointer text-xs font-bold"
-            style={{ background: '#3d2b1f', color: '#c5a059' }}
-          >
-            CLOSE GUIDE
-          </button>
+    <div id="guide" class="card" style="display: none;">
+        <div class="guide-section">
+            <h3>☀️ Morning Shift</h3>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter counts in <b>AM</b> column. Click <b>Lock AM</b> when done to prevent accidental changes.</p>
         </div>
-      )}
-
-      {/* Controls */}
-      <div className="m-4 p-4 rounded shadow" style={{ background: 'white' }}>
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div>
-            <label className="block text-xs font-bold uppercase mb-1">Date</label>
-            <input
-              type="date"
-              className="w-full p-2 border rounded text-sm"
-              style={{ borderColor: '#dcdcdc' }}
-              value={trackingDate}
-              onChange={(e) => setTrackingDate(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold uppercase mb-1">Opening MOD</label>
-            <select
-              className="w-full p-2 border rounded text-sm"
-              style={{ borderColor: '#dcdcdc' }}
-              value={openingMod}
-              onChange={(e) => setOpeningMod(e.target.value)}
-            >
-              <option value="">Select...</option>
-              <option>Arin</option>
-              <option>Czar</option>
-              <option>Faith</option>
-              <option>Gully</option>
-              <option>Associate</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-bold uppercase mb-1">Closing MOD</label>
-            <select
-              className="w-full p-2 border rounded text-sm"
-              style={{ borderColor: '#dcdcdc' }}
-              value={closingMod}
-              onChange={(e) => setClosingMod(e.target.value)}
-            >
-              <option value="">Select...</option>
-              <option>Arin</option>
-              <option>Czar</option>
-              <option>Faith</option>
-              <option>Gully</option>
-              <option>Associate</option>
-            </select>
-          </div>
+        <div class="guide-section">
+            <h3>🔄 Two Ways to Track Sales</h3>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;"><b>Option 1 - Enter Refill:</b> Enter sold amount in <b>Refill</b> → PM auto-calculates (AM - Refill = PM)</p>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;"><b>Option 2 - Enter PM:</b> Enter ending count in <b>PM</b> → Refill auto-calculates (AM - PM = Refill)</p>
         </div>
-
-        <button
-          onClick={() => setAmLocked(true)}
-          disabled={amLocked}
-          className="w-full p-2 border-0 rounded font-bold cursor-pointer disabled:opacity-50"
-          style={{ background: '#c5a059' }}
-        >
-          {amLocked ? 'AM Locked' : 'Lock AM Counts'}
-        </button>
-      </div>
-
-      {/* Floor Tabs */}
-      <div className="flex gap-2 px-4 mb-4 sticky top-0 z-10 py-2" style={{ background: '#f4eee8' }}>
-        <button
-          onClick={() => setCurrentFloor('f6')}
-          className="flex-1 p-3 border-0 rounded font-bold cursor-pointer transition-all"
-          style={{
-            background: currentFloor === 'f6' ? '#3d2b1f' : '#e0dcd8',
-            color: currentFloor === 'f6' ? '#c5a059' : '#666',
-            fontSize: '12px'
-          }}
-        >
-          6th Floor Case
-        </button>
-        <button
-          onClick={() => setCurrentFloor('f1')}
-          className="flex-1 p-3 border-0 rounded font-bold cursor-pointer transition-all"
-          style={{
-            background: currentFloor === 'f1' ? '#3d2b1f' : '#e0dcd8',
-            color: currentFloor === 'f1' ? '#c5a059' : '#666',
-            fontSize: '12px'
-          }}
-        >
-          1st Floor Case
-        </button>
-      </div>
-
-      {/* Tables */}
-      <div className="mx-4 mb-4 rounded shadow p-1" style={{ background: 'white' }}>
-        {currentFloor === 'f6' && renderTable(f6List, f6Data, f6Stats, 'f6')}
-        {currentFloor === 'f1' && renderTable(f1List, f1Data, f1Stats, 'f1')}
-      </div>
-
-      {/* Scan Modal */}
-      {scanningFlavor && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.8)' }}>
-          <div className="rounded-lg p-6 max-w-md w-full" style={{ background: 'white' }}>
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="font-bold text-lg">
-                  {scanningFlavor.mode === 'am' ? 'AM Count' : 'PM Count'}
-                </h3>
-                <p className="text-xs" style={{ color: '#666' }}>
-                  {(scanningFlavor.floor === 'f6' ? f6List : f1List)[scanningFlavor.index]}
-                </p>
-              </div>
-              <button onClick={cancelScan} style={{ color: '#666' }}>
-                <X size={24} />
-              </button>
-            </div>
-
-            {analyzing ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#3d2b1f' }}></div>
-                <p className="text-sm" style={{ color: '#666' }}>AI is counting truffles...</p>
-              </div>
-            ) : currentCount ? (
-              <>
-                <div className={`p-4 rounded mb-4 border-2`} style={{
-                  background: currentCount.confidence === 'high' ? '#f0fdf4' : currentCount.confidence === 'medium' ? '#fefce8' : '#fef2f2',
-                  borderColor: currentCount.confidence === 'high' ? '#86efac' : currentCount.confidence === 'medium' ? '#fde047' : '#fca5a5'
-                }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-bold">AI Count:</span>
-                    <span className="text-3xl font-bold">{currentCount.count}</span>
-                  </div>
-                  <p className="text-xs" style={{ color: '#666' }}>{currentCount.notes}</p>
-                  <div className="flex items-center gap-1 mt-2">
-                    <span className="text-xs">Confidence:</span>
-                    <span className={`text-xs font-bold uppercase`} style={{
-                      color: currentCount.confidence === 'high' ? '#16a34a' : currentCount.confidence === 'medium' ? '#ca8a04' : '#dc2626'
-                    }}>
-                      {currentCount.confidence}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={acceptCount}
-                    className="p-3 text-white rounded font-bold flex items-center justify-center gap-2 border-0 cursor-pointer"
-                    style={{ background: '#4a6741' }}
-                  >
-                    <CheckCircle size={20} />
-                    Accept
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCurrentCount(null);
-                      setTimeout(() => fileInputRef.current?.click(), 100);
-                    }}
-                    className="p-3 text-white rounded font-bold border-0 cursor-pointer"
-                    style={{ background: '#c5a059' }}
-                  >
-                    Retake Photo
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-center mb-4" style={{ color: '#666' }}>
-                  Take a clear photo of this flavor's plate
-                </p>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full p-4 rounded font-bold flex items-center justify-center gap-2 mb-2 border-0 cursor-pointer"
-                  style={{ background: '#3d2b1f', color: '#c5a059' }}
-                >
-                  <Camera size={20} />
-                  Take Photo
-                </button>
-              </>
-            )}
-          </div>
+        <div class="guide-section">
+            <h3>📊 Auto-Calculations</h3>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;"><b>Sold</b> shows AM - PM. <b>End</b> shows final PM count. Use whichever method works best for your workflow!</p>
         </div>
-      )}
-
-      {/* Summary Footer */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 shadow-lg" style={{ background: '#3d2b1f', color: '#c5a059' }}>
-        <div className="flex justify-around mb-3 pb-3 border-b" style={{ borderColor: 'rgba(197,160,89,0.3)' }}>
-          <div className="text-center">
-            <div className="text-xs">F6 STOCK</div>
-            <div className="text-xl font-bold">{totalF6}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs">F1 STOCK</div>
-            <div className="text-xl font-bold">{totalF1}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs">GRAND TOTAL</div>
-            <div className="text-xl font-bold border-b-2" style={{ color: 'white', borderColor: '#c5a059' }}>
-              {totalF6 + totalF1}
-            </div>
-          </div>
-        </div>
-
-        <div className="px-2">
-          <div className="text-xs font-bold mb-2">🏆 TOP SELLERS TODAY</div>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {topSellers.length > 0 ? (
-              topSellers.map(([name, count], i) => (
-                <div
-                  key={i}
-                  className="px-2 py-1 rounded text-xs flex items-center gap-1 border"
-                  style={{ background: 'rgba(255,255,255,0.1)', borderColor: 'rgba(197,160,89,0.2)' }}
-                >
-                  <span>#{i + 1}</span>
-                  <span>{name.slice(0, 20)}...</span>
-                  <span className="font-bold" style={{ color: 'white' }}>{count}</span>
-                </div>
-              ))
-            ) : (
-              <div className="text-xs opacity-50">Enter PM counts to track...</div>
-            )}
-          </div>
-        </div>
-      </div>
+        <button onclick="toggleGuide()" style="width: 100%; padding: 8px; background: var(--bissingers-brown); color: var(--bissingers-gold); border: none; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">CLOSE GUIDE</button>
     </div>
-  );
-};
 
-export default TruffleCounterAI;
+    <div class="card">
+        <div class="input-grid">
+            <div class="input-group">
+                <label>Date</label>
+                <input type="date" id="trackingDate" onchange="updateDateDisplay(); saveData();">
+            </div>
+            <div class="input-group">
+                <label>Opening MOD</label>
+                <select id="openingMod" onchange="saveData()">
+                    <option value="">Select...</option>
+                    <option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Closing MOD</label>
+                <select id="closingMod" onchange="saveData()">
+                    <option value="">Select...</option>
+                    <option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
+                </select>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 15px;">
+            <button id="lockAmBtn" style="flex: 2; padding: 10px; background: var(--bissingers-gold); border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="lockAM()">Lock AM Counts</button>
+            <button style="flex: 1; padding: 10px; background: var(--info); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="openReport()">📋 Report</button>
+            <button style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="window.print()">🖨️ PDF</button>
+        </div>
+        <div style="margin-top: 10px;">
+            <button style="width: 100%; padding: 8px; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.7rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;" onclick="confirmReset()">Clear All Today's Data</button>
+        </div>
+    </div>
+
+    <div class="floor-tabs">
+        <button class="tab-btn active" id="btn-f6" onclick="switchFloor('f6')">6th Floor Case</button>
+        <button class="tab-btn" id="btn-f1" onclick="switchFloor('f1')">1st Floor Case</button>
+    </div>
+
+    <div id="f6-view" class="floor-view active">
+        <div class="card" style="padding: 5px;">
+            <div class="table-container">
+                <table id="f6Table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Flavor</th>
+                            <th>AM</th>
+                            <th>Refill</th>
+                            <th>PM</th>
+                            <th>Sold</th>
+                            <th>End</th>
+                        </tr>
+                    </thead>
+                    <tbody id="f6Body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="f1-view" class="floor-view">
+        <div class="card" style="padding: 5px;">
+            <div class="table-container">
+                <table id="f1Table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Flavor</th>
+                            <th>AM</th>
+                            <th>Refill</th>
+                            <th>PM</th>
+                            <th>Sold</th>
+                            <th>End</th>
+                        </tr>
+                    </thead>
+                    <tbody id="f1Body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-footer">
+        <div class="summary-stats">
+            <div class="summary-item">
+                <span style="font-size: 0.6rem;">F6 STOCK</span>
+                <span class="summary-val" id="total-f6">0</span>
+            </div>
+            <div class="summary-item">
+                <span style="font-size: 0.6rem;">F1 STOCK</span>
+                <span class="summary-val" id="total-f1">0</span>
+            </div>
+            <div class="summary-item">
+                <span style="font-size: 0.6rem;">GRAND TOTAL</span>
+                <span class="summary-val" id="total-grand" style="color:white; border-bottom: 2px solid var(--bissingers-gold);">0</span>
+            </div>
+        </div>
+        
+        <div class="top-sellers-panel">
+            <div class="top-sellers-title">🏆 Top Sellers Today</div>
+            <div id="topSellersList" class="top-sellers-grid">
+                <div class="seller-badge" style="opacity: 0.5;">Enter PM counts to track...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="reportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:25px; border-radius:8px; width:90%; max-width:350px; text-align:center;">
+            <h3>Report Generation</h3>
+            <button style="width:100%; padding:12px; margin:8px 0; background:var(--info); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="generateReport('am')">Copy AM Report</button>
+            <button style="width:100%; padding:12px; margin:8px 0; background:var(--bissingers-brown); color:var(--bissingers-gold); border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="generateReport('pm')">Copy PM Report</button>
+            <button style="width:100%; padding:10px; margin-top:10px; border:none; background:#eee; cursor:pointer;" onclick="closeReport()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // UPDATED 6TH FLOOR LIST
+        const f6List = [
+            "BIRTHDAY CAKE TRUFFLE",
+            "WEDDING CAKE TRUFFLE",
+            "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE",
+            "RED VELVET CAKE TRUFFLE",
+            "MILK CHOCOLATE CHERRY CORDIALS",
+            "DARK CHOCOLATE CHERRY CORDIALS",
+            "STRAWBERRY TRUFFLE",
+            "DARK CHOCOLATE RASPBERRY TRUFFLE",
+            "DARK CHOCOLATE CHAMPAGNE TRUFFLE",
+            "RASPBERRY CARAMEL JEWEL",
+            "STRAWBERRY CHEESECAKE TRUFFLE",
+            "IRISH CREME TRUFFLE",
+            "WHITE RUSSIAN TRUFFLE",
+            "CREME BRÛLÉE TRUFFLE",
+            "TIRAMISU TRUFFLE",
+            "DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE",
+            "ITALIAN ESPRESSO TRUFFLE",
+            "GERMAN CHOCOLATE TRUFFLE",
+            "DARK CHOCOLATE SOUFFLÉ TRUFFLE",
+            "PINEAPPLE UPSIDE DOWN CAKE TRUFFLE",
+            "WHITE EURO TRUFFLE",
+            "DARK CHOCOLATE FRENCH VANILLA TRUFFLE",
+            "FRENCH VANILLA \"B\"",
+            "CHOCOLATE MILKSHAKE TRUFFLE",
+            "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE",
+            "MILK SWISS CHOCOLATE TRUFFLE",
+            "DARK SWISS CHOCOLATE TRUFFLE",
+            "MILK SEA SALT CARAMEL",
+            "DARK CHOCOLATE HIMALAYAN SEA SALT CARAMEL",
+            "DARK CHOCOLATE CARAMEL",
+            "MILK CHOCOLATE DOUBLE CHOCOLATE CARAMEL",
+            "DARK SEA SALT CARAMEL TRUFFLE",
+            "FRESH MINT TRUFFLE",
+            "DARK CREME MINTS",
+            "MILK CHOCOLATE MAPLE PECAN CREAM",
+            "DARK CHOCOLATE MAPLE PECAN CREAM",
+            "PISTACHIO CROWN TRUFFLE",
+            "DARK CHOCOLATE FRENCH VANILLA DREAM",
+            "MILK VANILLA DREAMS",
+            "LEMON TEARDROP TRUFFLE",
+            "MILK CHOCOLATE SWISS PECAN CREAM",
+            "DARK CHOCOLATE RASPBERRY CREME",
+            "MILK CHOCOLATE RASPBERRY CREME",
+            "MILK ORANGE CRE
+          
