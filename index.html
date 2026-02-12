@@ -17,7 +17,6 @@
             --light: #f4eee8;
             --white: #ffffff;
             --highlight-row-bg: rgba(197, 160, 89, 0.15);
-            --manual-mode: #8b4513;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -93,36 +92,6 @@
 
         .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 10px 20px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 1001; pointer-events: none; }
 
-        .manual-mode-btn {
-            background: transparent;
-            color: var(--manual-mode);
-            border: 2px solid var(--manual-mode);
-            padding: 10px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            transition: 0.3s;
-        }
-        
-        .manual-mode-btn.active {
-            background: var(--manual-mode);
-            color: white;
-        }
-
-        .auto-fill-badge {
-            display: inline-block;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 3px;
-            margin-left: 10px;
-            vertical-align: middle;
-        }
-
-        .badge-auto { background: var(--bissingers-gold); color: white; }
-        .badge-manual { background: var(--manual-mode); color: white; }
-
         @media print {
             .floor-tabs, .summary-footer, .settings-btn, #guide, button { display: none !important; }
             body { padding: 0; background: white; padding-bottom: 0; }
@@ -148,13 +117,13 @@
             <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter counts in <b>AM</b> column. Click <b>Lock AM</b> when done.</p>
         </div>
         <div class="guide-section">
-            <h3>🔄 Auto-Sync (Refill & PM)</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">By default: Entering a <b>Refill</b> will subtract from AM and update <b>PM</b>. Entering <b>PM</b> will calculate the difference as a <b>Refill</b>.</p>
-            <p style="font-size: 0.75rem; margin-top: 5px; color: var(--manual-mode);">🔒 <b>Manual Mode</b>: Click "Prevent Auto-Fill" to disable automatic calculations and enter values independently.</p>
+            <h3>🧮 Sold Calculation</h3>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;"><b>Sold = AM - PM + Refill</b> (if Refill > 0)</p>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;">End = PM (closing count)</p>
         </div>
         <div class="guide-section">
             <h3>🌙 Evening Shift</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter closing counts in <b>PM</b>. Tracker calculates: <i>AM - PM = Sold</i>.</p>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter closing counts in <b>PM</b>. Sold is calculated automatically.</p>
         </div>
         <button onclick="toggleGuide()" style="width: 100%; padding: 8px; background: var(--bissingers-brown); color: var(--bissingers-gold); border: none; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">CLOSE GUIDE</button>
     </div>
@@ -181,18 +150,12 @@
             </div>
         </div>
         <div style="display: flex; gap: 8px; margin-top: 15px;">
-            <button id="lockAmBtn" style="flex: 1.5; padding: 10px; background: var(--bissingers-gold); border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="lockAM()">Lock AM Counts</button>
-            <button id="preventAutoFillBtn" class="manual-mode-btn" style="flex: 1.5;" onclick="toggleAutoFill()">
-                ⚡ Prevent Auto-Fill
-            </button>
+            <button id="lockAmBtn" style="flex: 2; padding: 10px; background: var(--bissingers-gold); border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="lockAM()">Lock AM Counts</button>
             <button style="flex: 1; padding: 10px; background: var(--info); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="openReport()">📋 Report</button>
             <button style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="window.print()">🖨️ PDF</button>
         </div>
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
-            <span id="autoFillStatus" style="font-size: 0.75rem; padding: 4px 8px; background: rgba(197,160,89,0.2); border-radius: 4px;">
-                <span id="statusIndicator">⚡ Auto-Fill Mode Active</span>
-            </span>
-            <button style="padding: 8px; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.7rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;" onclick="confirmReset()">
+        <div style="margin-top: 10px;">
+            <button style="width: 100%; padding: 8px; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.7rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;" onclick="confirmReset()">
                 Clear All Today's Data
             </button>
         </div>
@@ -260,9 +223,9 @@
         </div>
         
         <div class="top-sellers-panel">
-            <div class="top-sellers-title">🏆 Top Sellers Today</div>
+            <div class="top-sellers-title">🏆 Top 5 Sold Today</div>
             <div id="topSellersList" class="top-sellers-grid">
-                <div class="seller-badge" style="opacity: 0.5;">Enter PM counts to track...</div>
+                <div class="seller-badge" style="opacity: 0.5;">Enter counts to track sales...</div>
             </div>
         </div>
     </div>
@@ -398,9 +361,6 @@
             "PISTACHIO CROWN TRUFFLES"
         ];
 
-        // Global state for auto-fill prevention
-        let autoFillEnabled = true;
-
         function init() {
             const dateInput = document.getElementById('trackingDate');
             if (!dateInput.value) {
@@ -412,7 +372,6 @@
             renderRows(f1List, 'f1Body', 'f1');
             setupRowHighlighting();
             loadData();
-            updateAutoFillStatus();
         }
 
         function setupRowHighlighting() {
@@ -438,39 +397,6 @@
             g.style.display = g.style.display === 'none' ? 'block' : 'none';
         }
 
-        function toggleAutoFill() {
-            autoFillEnabled = !autoFillEnabled;
-            const btn = document.getElementById('preventAutoFillBtn');
-            
-            if (autoFillEnabled) {
-                btn.classList.remove('active');
-                btn.innerHTML = '⚡ Prevent Auto-Fill';
-                showToast('Auto-Fill Mode Activated - Refill & PM will sync automatically');
-            } else {
-                btn.classList.add('active');
-                btn.innerHTML = '🔒 Manual Mode Active';
-                showToast('Manual Mode Activated - Auto-fill disabled. Enter values independently.');
-            }
-            
-            updateAutoFillStatus();
-            saveData();
-        }
-
-        function updateAutoFillStatus() {
-            const statusEl = document.getElementById('statusIndicator');
-            const statusContainer = document.getElementById('autoFillStatus');
-            
-            if (autoFillEnabled) {
-                statusEl.innerHTML = '⚡ Auto-Fill Mode Active';
-                statusContainer.style.background = 'rgba(197,160,89,0.2)';
-                statusContainer.style.color = 'var(--bissingers-brown)';
-            } else {
-                statusEl.innerHTML = '🔒 Manual Mode - Auto-Fill Disabled';
-                statusContainer.style.background = 'rgba(139,69,19,0.1)';
-                statusContainer.style.color = 'var(--manual-mode)';
-            }
-        }
-
         function renderRows(list, containerId, prefix) {
             const container = document.getElementById(containerId);
             container.innerHTML = ''; // Clear existing rows
@@ -486,9 +412,9 @@
 
                 tr.innerHTML = `
                     <td>${name}${isHalfPlate ? '<span class="half-plate-badge">Half Plate</span>' : ''}</td>
-                    <td><input type="number" id="${id}_am" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'am')" oninput="calc('${id}', 'am')"></td>
-                    <td><input type="number" id="${id}_refill" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'refill')" oninput="calc('${id}', 'refill')"></td>
-                    <td><input type="number" id="${id}_pm" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'pm')" oninput="calc('${id}', 'pm')"></td>
+                    <td><input type="number" id="${id}_am" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'am')" oninput="calculateSoldAndEnd('${id}')"></td>
+                    <td><input type="number" id="${id}_refill" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'refill')" oninput="calculateSoldAndEnd('${id}')"></td>
+                    <td><input type="number" id="${id}_pm" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'pm')" oninput="calculateSoldAndEnd('${id}')"></td>
                     <td id="${id}_sold" class="sold-text">0</td>
                     <td id="${id}_end" class="end-text">0</td>
                 `;
@@ -508,34 +434,32 @@
             }
         }
 
-        function calc(id, trigger) {
-            const amIn = document.getElementById(`${id}_am`);
-            const refIn = document.getElementById(`${id}_refill`);
-            const pmIn = document.getElementById(`${id}_pm`);
+        // ONLY function that calculates Sold and End
+        // Sold = AM - PM + Refill (if Refill > 0)
+        function calculateSoldAndEnd(id) {
+            const amInput = document.getElementById(`${id}_am`);
+            const refillInput = document.getElementById(`${id}_refill`);
+            const pmInput = document.getElementById(`${id}_pm`);
             const soldEl = document.getElementById(`${id}_sold`);
             const endEl = document.getElementById(`${id}_end`);
 
-            const am = parseInt(amIn.value) || 0;
-            let ref = parseInt(refIn.value) || 0;
-            let pm = parseInt(pmIn.value) || 0;
+            const am = parseInt(amInput.value) || 0;
+            const refill = parseInt(refillInput.value) || 0;
+            const pm = parseInt(pmInput.value) || 0;
 
-            // Only perform auto-calculations if autoFill is enabled
-            if (autoFillEnabled) {
-                if (trigger === 'refill' && ref > 0) {
-                    pm = Math.max(0, am - ref);
-                    pmIn.value = pm;
-                } else if (trigger === 'pm' && am > 0) {
-                    ref = Math.max(0, am - pm);
-                    refIn.value = ref;
-                }
-            }
-
-            const soldValue = Math.max(0, am - pm);
+            // Calculate Sold: AM - PM + Refill (only add refill if it exists)
+            const soldValue = Math.max(0, am - pm + refill);
+            
+            // Update displays
             soldEl.textContent = soldValue;
             endEl.textContent = pm;
 
-            if (pm > 0 && pm < 5) endEl.classList.add('low-stock');
-            else endEl.classList.remove('low-stock');
+            // Low stock warning
+            if (pm > 0 && pm < 5) {
+                endEl.classList.add('low-stock');
+            } else {
+                endEl.classList.remove('low-stock');
+            }
 
             updateTotals();
             saveData();
@@ -556,17 +480,36 @@
 
         function updateTopSellers() {
             const sales = {};
-            const tally = (list, prefix) => list.forEach((name, i) => {
-                const el = document.getElementById(`${prefix}_${i}_sold`);
-                const s = el ? (parseInt(el.textContent) || 0) : 0;
-                if (s > 0) sales[name] = (sales[name] || 0) + s;
+            
+            // Tally sold counts from 6th floor
+            f6List.forEach((name, i) => {
+                const el = document.getElementById(`f6_${i}_sold`);
+                const sold = el ? (parseInt(el.textContent) || 0) : 0;
+                if (sold > 0) {
+                    sales[name] = (sales[name] || 0) + sold;
+                }
             });
-            tally(f6List, 'f6'); 
-            tally(f1List, 'f1');
-            const sorted = Object.entries(sales).sort((a,b) => b[1]-a[1]).slice(0,5);
-            document.getElementById('topSellersList').innerHTML = sorted.length ? sorted.map(([n,c],i) => `
-                <div class="seller-badge"><span>#${i+1}</span> ${n} <span class="seller-count">${c}</span></div>
-            `).join('') : '<div class="seller-badge" style="opacity: 0.5;">Waiting for sales data...</div>';
+            
+            // Tally sold counts from 1st floor
+            f1List.forEach((name, i) => {
+                const el = document.getElementById(`f1_${i}_sold`);
+                const sold = el ? (parseInt(el.textContent) || 0) : 0;
+                if (sold > 0) {
+                    sales[name] = (sales[name] || 0) + sold;
+                }
+            });
+            
+            // Sort by highest sold count and take top 5
+            const sorted = Object.entries(sales).sort((a,b) => b[1] - a[1]).slice(0,5);
+            
+            // Update the display
+            document.getElementById('topSellersList').innerHTML = sorted.length ? sorted.map(([name, count], i) => `
+                <div class="seller-badge">
+                    <span>#${i+1}</span> 
+                    ${name} 
+                    <span class="seller-count">${count}</span>
+                </div>
+            `).join('') : '<div class="seller-badge" style="opacity: 0.5;">Enter counts to track sales...</div>';
         }
 
         function switchFloor(f) {
@@ -611,7 +554,6 @@
                 oMod: document.getElementById('openingMod').value,
                 cMod: document.getElementById('closingMod').value,
                 amLocked: document.getElementById('lockAmBtn').disabled,
-                autoFillEnabled: autoFillEnabled,
                 f6: mapData(f6List, 'f6'),
                 f1: mapData(f1List, 'f1')
             };
@@ -626,20 +568,6 @@
             document.getElementById('trackingDate').value = d.date || '';
             document.getElementById('openingMod').value = d.oMod || '';
             document.getElementById('closingMod').value = d.cMod || '';
-            
-            // Load auto-fill state
-            if (d.autoFillEnabled !== undefined) {
-                autoFillEnabled = d.autoFillEnabled;
-                updateAutoFillStatus();
-                const btn = document.getElementById('preventAutoFillBtn');
-                if (!autoFillEnabled) {
-                    btn.classList.add('active');
-                    btn.innerHTML = '🔒 Manual Mode Active';
-                } else {
-                    btn.classList.remove('active');
-                    btn.innerHTML = '⚡ Prevent Auto-Fill';
-                }
-            }
             
             const fill = (list, prefix, arr) => {
                 if (!arr) return;
@@ -658,7 +586,7 @@
                         const amInput = document.getElementById(`${id}_am`);
                         if (amInput) amInput.disabled = true;
                     }
-                    calc(id, 'load');
+                    calculateSoldAndEnd(id);
                 });
             };
             
