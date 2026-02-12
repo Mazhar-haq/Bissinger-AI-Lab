@@ -16,7 +16,8 @@
             --info: #2c3e50;
             --light: #f4eee8;
             --white: #ffffff;
-            --highlight-row-bg: rgba(197, 160, 89, 0.15); /* Soft gold highlight */
+            --highlight-row-bg: rgba(197, 160, 89, 0.15);
+            --manual-mode: #8b4513;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -92,6 +93,36 @@
 
         .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 10px 20px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 1001; pointer-events: none; }
 
+        .manual-mode-btn {
+            background: transparent;
+            color: var(--manual-mode);
+            border: 2px solid var(--manual-mode);
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        
+        .manual-mode-btn.active {
+            background: var(--manual-mode);
+            color: white;
+        }
+
+        .auto-fill-badge {
+            display: inline-block;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .badge-auto { background: var(--bissingers-gold); color: white; }
+        .badge-manual { background: var(--manual-mode); color: white; }
+
         @media print {
             .floor-tabs, .summary-footer, .settings-btn, #guide, button { display: none !important; }
             body { padding: 0; background: white; padding-bottom: 0; }
@@ -118,7 +149,8 @@
         </div>
         <div class="guide-section">
             <h3>🔄 Auto-Sync (Refill & PM)</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">Entering a <b>Refill</b> will subtract from AM and update <b>PM</b>. Entering <b>PM</b> will calculate the difference as a <b>Refill</b>.</p>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;">By default: Entering a <b>Refill</b> will subtract from AM and update <b>PM</b>. Entering <b>PM</b> will calculate the difference as a <b>Refill</b>.</p>
+            <p style="font-size: 0.75rem; margin-top: 5px; color: var(--manual-mode);">🔒 <b>Manual Mode</b>: Click "Prevent Auto-Fill" to disable automatic calculations and enter values independently.</p>
         </div>
         <div class="guide-section">
             <h3>🌙 Evening Shift</h3>
@@ -149,12 +181,20 @@
             </div>
         </div>
         <div style="display: flex; gap: 8px; margin-top: 15px;">
-            <button id="lockAmBtn" style="flex: 2; padding: 10px; background: var(--bissingers-gold); border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="lockAM()">Lock AM Counts</button>
+            <button id="lockAmBtn" style="flex: 1.5; padding: 10px; background: var(--bissingers-gold); border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="lockAM()">Lock AM Counts</button>
+            <button id="preventAutoFillBtn" class="manual-mode-btn" style="flex: 1.5;" onclick="toggleAutoFill()">
+                ⚡ Prevent Auto-Fill
+            </button>
             <button style="flex: 1; padding: 10px; background: var(--info); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="openReport()">📋 Report</button>
             <button style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="window.print()">🖨️ PDF</button>
         </div>
-        <div style="margin-top: 10px;">
-            <button style="width: 100%; padding: 8px; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.7rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;" onclick="confirmReset()">Clear All Today's Data</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
+            <span id="autoFillStatus" style="font-size: 0.75rem; padding: 4px 8px; background: rgba(197,160,89,0.2); border-radius: 4px;">
+                <span id="statusIndicator">⚡ Auto-Fill Mode Active</span>
+            </span>
+            <button style="padding: 8px; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.7rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;" onclick="confirmReset()">
+                Clear All Today's Data
+            </button>
         </div>
     </div>
 
@@ -329,6 +369,9 @@
             "PISTACHIO CROWN TRUFFLES"
         ];
 
+        // Global state for auto-fill prevention
+        let autoFillEnabled = true;
+
         function init() {
             const dateInput = document.getElementById('trackingDate');
             if (!dateInput.value) {
@@ -340,6 +383,7 @@
             renderRows(f1List, 'f1Body', 'f1');
             setupRowHighlighting();
             loadData();
+            updateAutoFillStatus();
         }
 
         function setupRowHighlighting() {
@@ -363,6 +407,39 @@
         function toggleGuide() {
             const g = document.getElementById('guide');
             g.style.display = g.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleAutoFill() {
+            autoFillEnabled = !autoFillEnabled;
+            const btn = document.getElementById('preventAutoFillBtn');
+            
+            if (autoFillEnabled) {
+                btn.classList.remove('active');
+                btn.innerHTML = '⚡ Prevent Auto-Fill';
+                showToast('Auto-Fill Mode Activated - Refill & PM will sync automatically');
+            } else {
+                btn.classList.add('active');
+                btn.innerHTML = '🔒 Manual Mode Active';
+                showToast('Manual Mode Activated - Auto-fill disabled. Enter values independently.');
+            }
+            
+            updateAutoFillStatus();
+            saveData();
+        }
+
+        function updateAutoFillStatus() {
+            const statusEl = document.getElementById('statusIndicator');
+            const statusContainer = document.getElementById('autoFillStatus');
+            
+            if (autoFillEnabled) {
+                statusEl.innerHTML = '⚡ Auto-Fill Mode Active';
+                statusContainer.style.background = 'rgba(197,160,89,0.2)';
+                statusContainer.style.color = 'var(--bissingers-brown)';
+            } else {
+                statusEl.innerHTML = '🔒 Manual Mode - Auto-Fill Disabled';
+                statusContainer.style.background = 'rgba(139,69,19,0.1)';
+                statusContainer.style.color = 'var(--manual-mode)';
+            }
         }
 
         function renderRows(list, containerId, prefix) {
@@ -412,12 +489,15 @@
             let ref = parseInt(refIn.value) || 0;
             let pm = parseInt(pmIn.value) || 0;
 
-            if (trigger === 'refill' && ref > 0) {
-                pm = Math.max(0, am - ref);
-                pmIn.value = pm;
-            } else if (trigger === 'pm' && am > 0) {
-                ref = Math.max(0, am - pm);
-                refIn.value = ref;
+            // Only perform auto-calculations if autoFill is enabled
+            if (autoFillEnabled) {
+                if (trigger === 'refill' && ref > 0) {
+                    pm = Math.max(0, am - ref);
+                    pmIn.value = pm;
+                } else if (trigger === 'pm' && am > 0) {
+                    ref = Math.max(0, am - pm);
+                    refIn.value = ref;
+                }
             }
 
             const soldValue = Math.max(0, am - pm);
@@ -498,6 +578,7 @@
                 oMod: document.getElementById('openingMod').value,
                 cMod: document.getElementById('closingMod').value,
                 amLocked: document.getElementById('lockAmBtn').disabled,
+                autoFillEnabled: autoFillEnabled,
                 f6: mapData(f6List, 'f6'),
                 f1: mapData(f1List, 'f1')
             };
@@ -512,68 +593,6 @@
             document.getElementById('openingMod').value = d.oMod;
             document.getElementById('closingMod').value = d.cMod;
             
-            const fill = (list, prefix, arr) => list.forEach((_, i) => {
-                const id = `${prefix}_${i}`;
-                if (arr && arr[i]) {
-                    document.getElementById(`${id}_am`).value = arr[i].am;
-                    document.getElementById(`${id}_refill`).value = arr[i].ref;
-                    document.getElementById(`${id}_pm`).value = arr[i].pm;
-                }
-                if (d.amLocked) document.getElementById(`${id}_am`).disabled = true;
-                calc(id, 'init');
-            });
-            fill(f6List, 'f6', d.f6); fill(f1List, 'f1', d.f1);
-            if (d.amLocked) {
-                const b = document.getElementById('lockAmBtn');
-                b.textContent = "AM Locked"; b.disabled = true; b.style.opacity = "0.5";
-            }
-            updateDateDisplay();
-        }
-
-        function openReport() { document.getElementById('reportModal').style.display = 'flex'; }
-        function closeReport() { document.getElementById('reportModal').style.display = 'none'; }
-        function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 2500); }
-
-        function generateReport(type) {
-            const date = document.getElementById('displayDate').textContent;
-            const mod = document.getElementById(type === 'am' ? 'openingMod' : 'closingMod').value || 'N/A';
-            let report = `BISSINGER'S ${type.toUpperCase()} REPORT\nDate: ${date}\nMOD: ${mod}\n\n`;
-
-            const section = (title, list, prefix) => {
-                let reportContent = `--- ${title} FLOOR ---\n`;
-                let hasData = false;
-                list.forEach((name, i) => {
-                    const id = `${prefix}_${i}`;
-                    const am = document.getElementById(`${id}_am`)?.value || 0;
-                    const pm = document.getElementById(`${id}_pm`)?.value || 0;
-                    const sold = document.getElementById(`${id}_sold`)?.textContent || 0;
-                    if (type === 'am' && am > 0) {
-                        reportContent += `${name}: AM ${am}\n`;
-                        hasData = true;
-                    }
-                    if (type === 'pm' && (pm > 0 || sold > 0)) {
-                        reportContent += `${name}: Sold ${sold} | End ${pm}\n`;
-                        hasData = true;
-                    }
-                });
-                if (hasData) report += reportContent + `\n`;
-            };
-
-            section("6TH", f6List, "f6"); section("1ST", f1List, "f1");
-            
-            const textArea = document.createElement("textarea");
-            textArea.value = report;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showToast("Report copied!");
-            } catch (err) {
-                console.error('Unable to copy', err);
-            }
-            document.body.removeChild(textArea);
-            closeReport();
-        }
-    </script>
-</body>
-</html>
+            // Load auto-fill state
+            if (d.autoFillEnabled !== undefined) {
+                autoFillEnabled
