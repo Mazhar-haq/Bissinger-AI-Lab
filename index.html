@@ -3,661 +3,605 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bissinger's Herald Square Truffle Tracker</title>
+    <title>Bissinger's Truffle Tracker · Herald Square</title>
     <style>
-        :root {
-            --bissingers-brown: #3d2b1f; 
-            --bissingers-gold: #c5a059;  
-            --bissingers-cream: #f9f6f2;
-            --primary: var(--bissingers-brown);
-            --accent: var(--bissingers-gold);
-            --success: #4a6741;
-            --danger: #9e2a2b;
-            --info: #2c3e50;
-            --light: #f4eee8;
-            --white: #ffffff;
-            --highlight-row-bg: rgba(197, 160, 89, 0.15);
+        /* === EXACT REFERENCE FONT & STYLE === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Optima', 'Palatino', 'Segoe UI', serif; padding: 10px; background: var(--light); color: var(--bissingers-brown); padding-bottom: 280px; }
+        /* The correct font stack from the reference */
+        body {
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+            background: #f2eee9;
+            color: #1e2a24;
+            padding: 10px 12px 200px 12px;
+            line-height: 1.4;
+        }
 
-        .header { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 20px 10px; border-radius: 4px; margin-bottom: 15px; text-align: center; border-bottom: 3px solid var(--bissingers-gold); position: relative; }
-        .header h1 { font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 300; margin-bottom: 5px; }
-        
-        .settings-btn { position: absolute; right: 10px; top: 10px; background: none; border: none; color: var(--bissingers-gold); cursor: pointer; font-size: 1.2rem; }
+        /* header – deep brown / gold exactly like reference */
+        .header-bar {
+            background: #3d2f21;
+            color: #e2c28b;
+            padding: 16px 14px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #b3914b;
+        }
+        .header-bar h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        .date-badge {
+            background: #524433;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            color: #f5d896;
+        }
+        .help-link {
+            background: none;
+            border: 1px solid #b3914b;
+            color: #e2c28b;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .help-link:hover {
+            background: #b3914b;
+            color: #2d241a;
+        }
 
-        .card { background: var(--white); padding: 15px; border-radius: 4px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(61, 43, 31, 0.1); border: 1px solid rgba(197, 160, 89, 0.2); }
-        
-        .guide-section { font-size: 0.8rem; margin-bottom: 20px; border-left: 3px solid var(--bissingers-gold); padding-left: 15px; }
-        .guide-section h3 { font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; color: var(--bissingers-brown); }
+        /* guide card */
+        .guide-card {
+            background: #fffbf2;
+            border-left: 6px solid #b9974c;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin: 0 0 22px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            display: none;
+        }
+        .guide-card.show { display: block; }
+        .guide-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .guide-item {
+            flex: 1 1 150px;
+            background: white;
+            padding: 14px;
+            border-radius: 20px;
+            border: 1px solid #efdeb9;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        .guide-item strong { color: #886c34; }
 
-        .input-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        @media (min-width: 600px) { .input-grid { grid-template-columns: repeat(3, 1fr); } }
-        
-        .input-group { display: flex; flex-direction: column; gap: 4px; }
-        .input-group label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-        input, select { padding: 8px; border: 1px solid #dcdcdc; border-radius: 2px; width: 100%; font-size: 0.9rem; }
+        /* control panel */
+        .control-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 18px 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(93, 73, 41, 0.1);
+            border: 1px solid #e5d7bf;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .field {
+            flex: 1 1 160px;
+        }
+        .field label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #7c623b;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px 10px;
+            border: 1px solid #d4c3a8;
+            border-radius: 30px;
+            background: #fffcf5;
+            font-size: 0.9rem;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        input:focus, select:focus {
+            border-color: #b0883a;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(176,136,58,0.2);
+        }
 
-        .floor-tabs { display: flex; gap: 8px; margin-bottom: 15px; position: sticky; top: 0; z-index: 100; background: var(--light); padding: 10px 0; }
-        .tab-btn { flex: 1; padding: 12px; background: #e0dcd8; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem; color: #666; transition: 0.3s; }
-        .tab-btn.active { background: var(--bissingers-brown); color: var(--bissingers-gold); }
+        .button-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: #b0883a;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: white;
+            flex: 2;
+            cursor: pointer;
+            border-bottom: 3px solid #6c4f24;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        .btn-primary:active { transform: translateY(2px); border-bottom-width: 1px; }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            background: #aa9a7a;
+            border-bottom-color: #73613c;
+        }
+        .btn-secondary {
+            background: #e7dfd1;
+            border: 1px solid #a58757;
+            padding: 12px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            flex: 1;
+            cursor: pointer;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        .btn-danger {
+            background: transparent;
+            border: 2px solid #b15d47;
+            color: #a1432c;
+            font-weight: bold;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            width: 100%;
+            margin-top: 16px;
+            cursor: pointer;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+
+        /* floor tabs */
+        .floor-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0 10px 0;
+        }
+        .tab-btn {
+            flex: 1;
+            background: #ddd2c0;
+            border: none;
+            padding: 14px 0;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #353027;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #9f8a6b;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        .tab-btn.active {
+            background: #3d2f21;
+            color: #f5da99;
+            box-shadow: 0 3px 0 #b0883a;
+        }
 
         .floor-view { display: none; }
         .floor-view.active { display: block; }
 
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th { background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 8px 4px; font-size: 0.6rem; text-transform: uppercase; }
-        td { padding: 8px 4px; border-bottom: 1px solid #f0f0f0; text-align: center; font-size: 0.85rem; transition: background 0.2s; }
-        td:first-child { text-align: left; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; }
-        
-        .highlight-row td {
-            background-color: var(--highlight-row-bg) !important;
+        /* table styling */
+        .table-wrapper {
+            background: white;
+            border-radius: 18px;
+            padding: 2px 2px 10px 2px;
+            box-shadow: 0 8px 12px rgba(71, 56, 31, 0.1);
+            overflow-x: auto;
+            margin-bottom: 10px;
+            border: 1px solid #ebdbc0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 550px;
+        }
+        th {
+            background: #e9dccb;
+            color: #2d3a2b;
+            font-size: 0.7rem;
+            padding: 12px 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        td {
+            padding: 8px 3px;
+            border-bottom: 1px solid #eedfc9;
+            text-align: center;
+            font-size: 0.85rem;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        td:first-child {
+            text-align: left;
+            font-weight: 500;
+            color: #2b4a32;
+            padding-left: 10px;
+        }
+        .half-badge {
+            background: #bfa573;
+            color: #1f261c;
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 30px;
+            margin-left: 6px;
+            font-weight: 600;
+            white-space: nowrap;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
         }
 
-        .half-plate-badge { 
-            display: inline-block; 
-            font-size: 10px; 
-            background: var(--bissingers-gold); 
-            color: white; 
-            padding: 1px 4px; 
-            border-radius: 3px; 
-            margin-left: 5px; 
-            vertical-align: middle;
-            text-transform: none;
-            letter-spacing: 0;
-            font-weight: normal;
+        .count-input {
+            width: 52px;
+            padding: 5px 2px;
+            text-align: center;
+            border: 1px solid #cbad7a;
+            border-radius: 30px;
+            background: #fffcf2;
+            font-weight: 600;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        .count-input:disabled {
+            background: #ece1cf;
+            color: #5f543e;
+        }
+        .sold-cell {
+            color: #287846;
+            font-weight: 700;
+        }
+        .end-cell {
+            font-weight: 600;
+        }
+        .low-stock {
+            color: #b13b2c;
+            font-weight: 800;
         }
 
-        .count-input { width: 45px; text-align: center; padding: 4px; border: 1px solid #eee; }
-        .count-input:focus { border-color: var(--bissingers-gold); outline: none; background: #fffcf5; }
-        .count-input:disabled { background: #f9f9f9; color: #999; border: none; }
-
-        .sold-text { color: var(--success); font-weight: bold; }
-        .end-text { font-weight: bold; }
-        .low-stock { color: var(--danger); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        .summary-footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 15px; z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.3); }
-        .summary-stats { display: flex; justify-content: space-around; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(197,160,89,0.3); }
-        .summary-item { text-align: center; }
-        .summary-val { font-size: 1.2rem; font-weight: bold; display: block; }
-
-        .top-sellers-panel { display: block; padding: 5px 10px; }
-        .top-sellers-title { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; color: var(--bissingers-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
-        .top-sellers-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .seller-badge { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(197,160,89,0.2); }
-        .seller-count { color: #fff; font-weight: bold; }
-
-        .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: var(--bissingers-brown); color: var(--bissingers-gold); padding: 10px 20px; border-radius: 4px; opacity: 0; transition: 0.3s; z-index: 1001; pointer-events: none; }
-
-        @media print {
-            .floor-tabs, .summary-footer, .settings-btn, #guide, button { display: none !important; }
-            body { padding: 0; background: white; padding-bottom: 0; }
-            .card { box-shadow: none; border: 1px solid #ccc; }
-            .floor-view { display: block !important; }
-            .highlight-row td { background-color: transparent !important; }
+        /* footer */
+        .summary-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #2d3a2b;
+            color: #faeac1;
+            padding: 12px 15px 18px 15px;
+            border-top: 4px solid #b9974c;
+            box-shadow: 0 -8px 14px #2a1f12a0;
         }
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 10px;
+        }
+        .stat-block {
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 0.65rem;
+            opacity: 0.9;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #f3d78c;
+            line-height: 1;
+        }
+        .top-sellers-box {
+            background: #384e3b;
+            border-radius: 30px;
+            padding: 10px 16px;
+        }
+        .seller-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 5px;
+        }
+        .seller-tag {
+            background: #48614b;
+            padding: 4px 12px;
+            border-radius: 30px;
+            border: 1px solid #b9974c;
+            color: white;
+            font-size: 0.7rem;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+
+        /* modal & toast */
+        .modal {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+        .modal-card {
+            background: #fffcf2;
+            padding: 24px 16px;
+            border-radius: 36px;
+            width: 280px;
+            text-align: center;
+            border: 3px solid #b0883a;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        .modal-btn {
+            background: #3d2f21;
+            color: #e2c28b;
+            border: none;
+            padding: 12px;
+            border-radius: 60px;
+            margin: 8px 0;
+            width: 100%;
+            font-weight: bold;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        .toast {
+            position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%);
+            background: #1f2a1f; color: #f3da9b;
+            padding: 10px 22px; border-radius: 60px;
+            opacity: 0; transition: 0.2s; z-index: 4000;
+            font-family: 'Optima', 'Palatino', 'Segoe UI', serif;
+        }
+        @media print { .summary-footer, .tab-btn, .help-link, .btn-danger { display: none; } }
     </style>
 </head>
 <body onload="init()">
 
-    <div id="toast" class="toast">Action Complete</div>
+<div class="toast" id="toast">✓</div>
 
-    <div class="header">
-        <button class="settings-btn" onclick="toggleGuide()">📖 Help</button>
-        <h1>Bissinger's Truffle Tracker</h1>
-        <p id="displayDate" style="font-size: 0.8rem; opacity: 0.8;"></p>
+<div class="header-bar">
+    <h1>Bissinger's Truffle Tracker</h1>
+    <span class="date-badge" id="displayDate"></span>
+    <button class="help-link" onclick="toggleGuide()">📖 GUIDE</button>
+</div>
+
+<div id="guideCard" class="guide-card">
+    <div class="guide-row">
+        <div class="guide-item"><strong>☀️ Morning</strong><br>Enter AM counts. <span style="color:#886c34;">Lock AM</span> when done.</div>
+        <div class="guide-item"><strong>🧮 Sold</strong><br>Sold = (AM − PM) + Refill<br>End = PM</div>
+        <div class="guide-item"><strong>🌙 Evening</strong><br>Enter PM counts. Sold auto‑calculated.</div>
     </div>
+    <button onclick="toggleGuide()" style="margin-top:12px; background:#b0883a; border:0; color:white; padding:8px 20px; border-radius:30px">CLOSE</button>
+</div>
 
-    <div id="guide" class="card" style="display: none;">
-        <div class="guide-section">
-            <h3>☀️ Morning Shift</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter counts in <b>AM</b> column. Click <b>Lock AM</b> when done.</p>
+<!-- top controls -->
+<div class="control-panel">
+    <div class="flex-row">
+        <div class="field"><label>📅 Date</label><input type="date" id="trackingDate" onchange="updateDateDisplay(); saveAll()"></div>
+        <div class="field"><label>🔓 Opening MOD</label>
+            <select id="openingMod" onchange="saveAll()"><option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option></select>
         </div>
-        <div class="guide-section">
-            <h3>🧮 Sold Calculation</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;"><b>Sold = AM - PM + Refill</b> (if Refill > 0)</p>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">End = PM (closing count)</p>
-        </div>
-        <div class="guide-section">
-            <h3>🌙 Evening Shift</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter closing counts in <b>PM</b>. Sold is calculated automatically.</p>
-        </div>
-        <button onclick="toggleGuide()" style="width: 100%; padding: 8px; background: var(--bissingers-brown); color: var(--bissingers-gold); border: none; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">CLOSE GUIDE</button>
-    </div>
-
-    <div class="card">
-        <div class="input-grid">
-            <div class="input-group">
-                <label>Date</label>
-                <input type="date" id="trackingDate" onchange="updateDateDisplay(); saveData();">
-            </div>
-            <div class="input-group">
-                <label>Opening MOD</label>
-                <select id="openingMod" onchange="saveData()">
-                    <option value="">Select...</option>
-                    <option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Closing MOD</label>
-                <select id="closingMod" onchange="saveData()">
-                    <option value="">Select...</option>
-                    <option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option>
-                </select>
-            </div>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 15px;">
-            <button id="lockAmBtn" style="flex: 2; padding: 10px; background: var(--bissingers-gold); border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="lockAM()">Lock AM Counts</button>
-            <button style="flex: 1; padding: 10px; background: var(--info); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="openReport()">📋 Report</button>
-            <button style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="window.print()">🖨️ PDF</button>
-        </div>
-        <div style="margin-top: 10px;">
-            <button style="width: 100%; padding: 8px; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.7rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;" onclick="confirmReset()">
-                Clear All Today's Data
-            </button>
+        <div class="field"><label>🔒 Closing MOD</label>
+            <select id="closingMod" onchange="saveAll()"><option>Arin</option><option>Czar</option><option>Faith</option><option>Gully</option><option>Associate</option></select>
         </div>
     </div>
-
-    <div class="floor-tabs">
-        <button class="tab-btn active" id="btn-f6" onclick="switchFloor('f6')">6th Floor Case</button>
-        <button class="tab-btn" id="btn-f1" onclick="switchFloor('f1')">1st Floor Case</button>
+    <div class="button-strip">
+        <button class="btn-primary" id="lockAmBtn" onclick="lockAM()">🔒 Lock AM Counts</button>
+        <button class="btn-secondary" onclick="openReportModal()">📋 Report</button>
+        <button class="btn-secondary" onclick="window.print()">🖨️ PDF</button>
     </div>
+    <button class="btn-danger" onclick="confirmReset()">🗑️ Clear Today's Data</button>
+</div>
 
-    <div id="f6-view" class="floor-view active">
-        <div class="card" style="padding: 5px;">
-            <div class="table-container">
-                <table id="f6Table">
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;">Flavor</th>
-                            <th>AM</th>
-                            <th>Refill</th>
-                            <th>PM</th>
-                            <th>Sold</th>
-                            <th>End</th>
-                        </tr>
-                    </thead>
-                    <tbody id="f6Body"></tbody>
-                </table>
-            </div>
-        </div>
+<!-- floor tabs -->
+<div class="floor-tabs">
+    <button class="tab-btn active" id="btn-f6" onclick="switchFloor('f6')">6th Floor Case</button>
+    <button class="tab-btn" id="btn-f1" onclick="switchFloor('f1')">1st Floor Case</button>
+</div>
+
+<!-- 6th floor table -->
+<div id="f6-view" class="floor-view active">
+    <div class="table-wrapper">
+        <table id="f6Table">
+            <thead><tr><th>Flavor (6th)</th><th>AM</th><th>Refill</th><th>PM</th><th>Sold</th><th>End</th></tr></thead>
+            <tbody id="f6Body"></tbody>
+        </table>
     </div>
+</div>
 
-    <div id="f1-view" class="floor-view">
-        <div class="card" style="padding: 5px;">
-            <div class="table-container">
-                <table id="f1Table">
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;">Flavor</th>
-                            <th>AM</th>
-                            <th>Refill</th>
-                            <th>PM</th>
-                            <th>Sold</th>
-                            <th>End</th>
-                        </tr>
-                    </thead>
-                    <tbody id="f1Body"></tbody>
-                </table>
-            </div>
-        </div>
+<!-- 1st floor table -->
+<div id="f1-view" class="floor-view">
+    <div class="table-wrapper">
+        <table id="f1Table">
+            <thead><tr><th>Flavor (1st)</th><th>AM</th><th>Refill</th><th>PM</th><th>Sold</th><th>End</th></tr></thead>
+            <tbody id="f1Body"></tbody>
+        </table>
     </div>
+</div>
 
-    <div class="summary-footer">
-        <div class="summary-stats">
-            <div class="summary-item">
-                <span style="font-size: 0.6rem;">F6 STOCK</span>
-                <span class="summary-val" id="total-f6">0</span>
-            </div>
-            <div class="summary-item">
-                <span style="font-size: 0.6rem;">F1 STOCK</span>
-                <span class="summary-val" id="total-f1">0</span>
-            </div>
-            <div class="summary-item">
-                <span style="font-size: 0.6rem;">GRAND TOTAL</span>
-                <span class="summary-val" id="total-grand" style="color:white; border-bottom: 2px solid var(--bissingers-gold);">0</span>
-            </div>
-        </div>
-        
-        <div class="top-sellers-panel">
-            <div class="top-sellers-title">🏆 Top 5 Sold Today</div>
-            <div id="topSellersList" class="top-sellers-grid">
-                <div class="seller-badge" style="opacity: 0.5;">Enter counts to track sales...</div>
-            </div>
-        </div>
+<!-- footer summary -->
+<div class="summary-footer">
+    <div class="summary-stats">
+        <div class="stat-block"><span class="stat-label">F6 STOCK</span><div class="stat-number" id="total-f6">0</div></div>
+        <div class="stat-block"><span class="stat-label">F1 STOCK</span><div class="stat-number" id="total-f1">0</div></div>
+        <div class="stat-block"><span class="stat-label">GRAND</span><div class="stat-number" id="total-grand">0</div></div>
     </div>
-
-    <div id="reportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center;">
-        <div style="background:white; padding:25px; border-radius:8px; width:90%; max-width:350px; text-align:center;">
-            <h3>Report Generation</h3>
-            <button style="width:100%; padding:12px; margin:8px 0; background:var(--info); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="generateReport('am')">Copy AM Report</button>
-            <button style="width:100%; padding:12px; margin:8px 0; background:var(--bissingers-brown); color:var(--bissingers-gold); border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="generateReport('pm')">Copy PM Report</button>
-            <button style="width:100%; padding:10px; margin-top:10px; border:none; background:#eee; cursor:pointer;" onclick="closeReport()">Cancel</button>
-        </div>
+    <div class="top-sellers-box">
+        <div style="font-weight:600; margin-bottom:5px;">🏆 Top 5 Sold Today</div>
+        <div id="topSellersList" class="seller-list"></div>
     </div>
+</div>
 
-    <script>
-        // 6TH FLOOR TRUFFLE FLAVORS - ALL 50 OF THEM
-        const f6List = [
-            "BIRTHDAY CAKE TRUFFLE",
-            "WEDDING CAKE TRUFFLE",
-            "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE",
-            "RED VELVET CAKE TRUFFLE",
-            "MILK CHOCOLATE CHERRY CORDIALS",
-            "DARK CHOCOLATE CHERRY CORDIALS",
-            "STRAWBERRY TRUFFLE",
-            "DARK CHOCOLATE RASPBERRY TRUFFLE",
-            "DARK CHOCOLATE CHAMPAGNE TRUFFLE",
-            "RASPBERRY CARAMEL JEWEL",
-            "STRAWBERRY CHEESECAKE TRUFFLE",
-            "IRISH CREME TRUFFLE",
-            "WHITE RUSSIAN TRUFFLE",
-            "CREME BRÛLÉE TRUFFLE",
-            "TIRAMISU TRUFFLE",
-            "DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE",
-            "ITALIAN ESPRESSO TRUFFLE",
-            "GERMAN CHOCOLATE TRUFFLE",
-            "DARK CHOCOLATE SOUFFLÉ TRUFFLE",
-            "PINEAPPLE UPSIDE DOWN CAKE TRUFFLE",
-            "WHITE EURO TRUFFLE",
-            "DARK CHOCOLATE FRENCH VANILLA TRUFFLE",
-            "FRENCH VANILLA \"B\"",
-            "CHOCOLATE MILKSHAKE TRUFFLE",
-            "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE",
-            "MILK SWISS CHOCOLATE TRUFFLE",
-            "DARK SWISS CHOCOLATE TRUFFLE",
-            "MILK SEA SALT CARAMEL",
-            "DARK CHOCOLATE HIMALAYAN SEA SALT CARAMEL",
-            "DARK CHOCOLATE CARAMEL",
-            "MILK CHOCOLATE DOUBLE CHOCOLATE CARAMEL",
-            "DARK SEA SALT CARAMEL TRUFFLE",
-            "FRESH MINT TRUFFLE",
-            "DARK CREME MINTS",
-            "MILK CHOCOLATE MAPLE PECAN CREAM",
-            "DARK CHOCOLATE MAPLE PECAN CREAM",
-            "PISTACHIO CROWN TRUFFLE",
-            "DARK CHOCOLATE FRENCH VANILLA DREAM",
-            "MILK VANILLA DREAMS",
-            "LEMON TEARDROP TRUFFLE",
-            "MILK CHOCOLATE SWISS PECAN CREAM",
-            "DARK CHOCOLATE RASPBERRY CREME",
-            "MILK CHOCOLATE RASPBERRY CREME",
-            "MILK ORANGE CREME",
-            "DARK CHOCOLATE ORANGE CREME",
-            "ROOT BEER FLOAT TRUFFLE",
-            "MILK CHOCOLATE ENGLISH ALMOND TOFFEE",
-            "DARK CINNAMON ALMOND CARAMEL",
-            "MILK CHOCOLATE PECAN CARAMEL",
-            "MILK CHOCOLATE PEANUT BUTTER TRUFFLE"
-        ];
-        
-        // 1ST FLOOR TRUFFLE FLAVORS - ALL 15 OF THEM
-        const f1List = [
-            "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE",
-            "FRESH MINT TRUFFLE",
-            "BIRTHDAY CAKE TRUFFLE",
-            "MILK CHOCOLATE TIRAMISU TRUFFLE",
-            "WHITE EURO TRUFFLE",
-            "MILK CHOCOLATE STRAWBERRY TRUFFLE",
-            "DARK CHOCOLATE RASPBERRY TRUFFLE",
-            "WEDDING CAKE TRUFFLE",
-            "RASPBERRY CARAMEL JEWEL TRUFFLE",
-            "MILK CHOCOLATE RED VELVET TRUFFLE",
-            "DARK CHOCOLATE FRENCH VANILLA \"B\"",
-            "MILK CHOCOLATE FRENCH SEA SALT CARAMEL",
-            "DARK CHOCOLATE SEA SALT CARAMEL",
-            "MILK CHOCOLATE SWISS PECAN CREAM",
-            "PISTACHIO CROWN TRUFFLES"
-        ];
+<!-- report modal -->
+<div id="reportModal" class="modal">
+    <div class="modal-card">
+        <h3 style="margin-bottom:15px">📋 Report</h3>
+        <button class="modal-btn" onclick="generateReport('am')">📋 Copy AM Report</button>
+        <button class="modal-btn" style="background:#b0883a; color:white;" onclick="generateReport('pm')">📋 Copy PM Report</button>
+        <button onclick="closeReportModal()" style="margin-top:12px; background:transparent; border:1px solid #8f7b5c; padding:8px; border-radius:30px">Cancel</button>
+    </div>
+</div>
 
-        // 6TH FLOOR HALF PLATE FLAVORS
-        const f6HalfPlates = [
-            "WEDDING CAKE TRUFFLE", 
-            "MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE", 
-            "MILK CHOCOLATE CHERRY CORDIALS", 
-            "DARK CHOCOLATE CHERRY CORDIALS",
-            "STRAWBERRY TRUFFLE", 
-            "DARK CHOCOLATE RASPBERRY TRUFFLE", 
-            "DARK CHOCOLATE CHAMPAGNE TRUFFLE", 
-            "RASPBERRY CARAMEL JEWEL",
-            "IRISH CREME TRUFFLE", 
-            "WHITE RUSSIAN TRUFFLE", 
-            "DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE", 
-            "ITALIAN ESPRESSO TRUFFLE",
-            "WHITE EURO TRUFFLE", 
-            "DARK CHOCOLATE FRENCH VANILLA TRUFFLE", 
-            "CHOCOLATE MILKSHAKE TRUFFLE", 
-            "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE",
-            "MILK SEA SALT CARAMEL", 
-            "DARK CHOCOLATE HIMALAYAN SEA SALT CARAMEL", 
-            "DARK CHOCOLATE CARAMEL", 
-            "MILK CHOCOLATE DOUBLE CHOCOLATE CARAMEL",
-            "FRESH MINT TRUFFLE", 
-            "DARK CREME MINTS", 
-            "MILK CHOCOLATE MAPLE PECAN CREAM", 
-            "DARK CHOCOLATE MAPLE PECAN CREAM",
-            "DARK CHOCOLATE FRENCH VANILLA DREAM", 
-            "MILK VANILLA DREAMS", 
-            "DARK CHOCOLATE RASPBERRY CREME", 
-            "MILK CHOCOLATE RASPBERRY CREME",
-            "MILK ORANGE CREME", 
-            "DARK CHOCOLATE ORANGE CREME", 
-            "ROOT BEER FLOAT TRUFFLE", 
-            "MILK CHOCOLATE ENGLISH ALMOND TOFFEE",
-            "DARK CINNAMON ALMOND CARAMEL", 
-            "MILK CHOCOLATE PECAN CARAMEL"
-        ];
+<script>
+    // ---------- FLAVOR LISTS (exact same) ----------
+    const f6List = [
+        "BIRTHDAY CAKE TRUFFLE","WEDDING CAKE TRUFFLE","MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE","RED VELVET CAKE TRUFFLE","MILK CHOCOLATE CHERRY CORDIALS","DARK CHOCOLATE CHERRY CORDIALS","STRAWBERRY TRUFFLE","DARK CHOCOLATE RASPBERRY TRUFFLE","DARK CHOCOLATE CHAMPAGNE TRUFFLE","RASPBERRY CARAMEL JEWEL","STRAWBERRY CHEESECAKE TRUFFLE","IRISH CREME TRUFFLE","WHITE RUSSIAN TRUFFLE","CREME BRÛLÉE TRUFFLE","TIRAMISU TRUFFLE","DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE","ITALIAN ESPRESSO TRUFFLE","GERMAN CHOCOLATE TRUFFLE","DARK CHOCOLATE SOUFFLÉ TRUFFLE","PINEAPPLE UPSIDE DOWN CAKE TRUFFLE","WHITE EURO TRUFFLE","DARK CHOCOLATE FRENCH VANILLA TRUFFLE","FRENCH VANILLA \"B\"","CHOCOLATE MILKSHAKE TRUFFLE","MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE","MILK SWISS CHOCOLATE TRUFFLE","DARK SWISS CHOCOLATE TRUFFLE","MILK SEA SALT CARAMEL","DARK CHOCOLATE HIMALAYAN SEA SALT CARAMEL","DARK CHOCOLATE CARAMEL","MILK CHOCOLATE DOUBLE CHOCOLATE CARAMEL","DARK SEA SALT CARAMEL TRUFFLE","FRESH MINT TRUFFLE","DARK CREME MINTS","MILK CHOCOLATE MAPLE PECAN CREAM","DARK CHOCOLATE MAPLE PECAN CREAM","PISTACHIO CROWN TRUFFLE","DARK CHOCOLATE FRENCH VANILLA DREAM","MILK VANILLA DREAMS","LEMON TEARDROP TRUFFLE","MILK CHOCOLATE SWISS PECAN CREAM","DARK CHOCOLATE RASPBERRY CREME","MILK CHOCOLATE RASPBERRY CREME","MILK ORANGE CREME","DARK CHOCOLATE ORANGE CREME","ROOT BEER FLOAT TRUFFLE","MILK CHOCOLATE ENGLISH ALMOND TOFFEE","DARK CINNAMON ALMOND CARAMEL","MILK CHOCOLATE PECAN CARAMEL","MILK CHOCOLATE PEANUT BUTTER TRUFFLE"
+    ];
+    const f1List = [
+        "MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE","FRESH MINT TRUFFLE","BIRTHDAY CAKE TRUFFLE","MILK CHOCOLATE TIRAMISU TRUFFLE","WHITE EURO TRUFFLE","MILK CHOCOLATE STRAWBERRY TRUFFLE","DARK CHOCOLATE RASPBERRY TRUFFLE","WEDDING CAKE TRUFFLE","RASPBERRY CARAMEL JEWEL TRUFFLE","MILK CHOCOLATE RED VELVET TRUFFLE","DARK CHOCOLATE FRENCH VANILLA \"B\"","MILK CHOCOLATE FRENCH SEA SALT CARAMEL","DARK CHOCOLATE SEA SALT CARAMEL","MILK CHOCOLATE SWISS PECAN CREAM","PISTACHIO CROWN TRUFFLES"
+    ];
 
-        // 1ST FLOOR HALF PLATE FLAVORS
-        const f1HalfPlates = [
-            "MILK CHOCOLATE TIRAMISU TRUFFLE",
-            "WHITE EURO TRUFFLE",
-            "MILK CHOCOLATE FRENCH SEA SALT CARAMEL",
-            "DARK CHOCOLATE SEA SALT CARAMEL",
-            "MILK CHOCOLATE SWISS PECAN CREAM",
-            "PISTACHIO CROWN TRUFFLES"
-        ];
+    const f6Half = ["WEDDING CAKE TRUFFLE","MILK CHOCOLATE CARAMEL CHEESECAKE TRUFFLE","MILK CHOCOLATE CHERRY CORDIALS","DARK CHOCOLATE CHERRY CORDIALS","STRAWBERRY TRUFFLE","DARK CHOCOLATE RASPBERRY TRUFFLE","DARK CHOCOLATE CHAMPAGNE TRUFFLE","RASPBERRY CARAMEL JEWEL","IRISH CREME TRUFFLE","WHITE RUSSIAN TRUFFLE","DARK CHOCOLATE CARAMEL MACCHIATO TRUFFLE","ITALIAN ESPRESSO TRUFFLE","WHITE EURO TRUFFLE","DARK CHOCOLATE FRENCH VANILLA TRUFFLE","CHOCOLATE MILKSHAKE TRUFFLE","MILK CHOCOLATE CARAMEL FUDGE BROWNIE TRUFFLE","MILK SEA SALT CARAMEL","DARK CHOCOLATE HIMALAYAN SEA SALT CARAMEL","DARK CHOCOLATE CARAMEL","MILK CHOCOLATE DOUBLE CHOCOLATE CARAMEL","FRESH MINT TRUFFLE","DARK CREME MINTS","MILK CHOCOLATE MAPLE PECAN CREAM","DARK CHOCOLATE MAPLE PECAN CREAM","DARK CHOCOLATE FRENCH VANILLA DREAM","MILK VANILLA DREAMS","DARK CHOCOLATE RASPBERRY CREME","MILK CHOCOLATE RASPBERRY CREME","MILK ORANGE CREME","DARK CHOCOLATE ORANGE CREME","ROOT BEER FLOAT TRUFFLE","MILK CHOCOLATE ENGLISH ALMOND TOFFEE","DARK CINNAMON ALMOND CARAMEL","MILK CHOCOLATE PECAN CARAMEL"];
+    const f1Half = ["MILK CHOCOLATE TIRAMISU TRUFFLE","WHITE EURO TRUFFLE","MILK CHOCOLATE FRENCH SEA SALT CARAMEL","DARK CHOCOLATE SEA SALT CARAMEL","MILK CHOCOLATE SWISS PECAN CREAM","PISTACHIO CROWN TRUFFLES"];
 
-        function init() {
-            const dateInput = document.getElementById('trackingDate');
-            if (!dateInput.value) {
-                const now = new Date();
-                dateInput.value = now.toISOString().split('T')[0];
-            }
-            updateDateDisplay();
-            renderRows(f6List, 'f6Body', 'f6');
-            renderRows(f1List, 'f1Body', 'f1');
-            setupRowHighlighting();
-            loadData();
-        }
+    function init() {
+        let d = new Date();
+        document.getElementById('trackingDate').value = d.toISOString().split('T')[0];
+        updateDateDisplay();
+        renderTable('f6', f6List, 'f6Body');
+        renderTable('f1', f1List, 'f1Body');
+        attachHighlight();
+        loadAll();
+        updateTotals();
+    }
 
-        function setupRowHighlighting() {
-            const tables = [document.getElementById('f6Table'), document.getElementById('f1Table')];
-            tables.forEach(table => {
-                table.addEventListener('focusin', (e) => {
-                    if (e.target.tagName === 'INPUT') {
-                        const row = e.target.closest('tr');
-                        if (row) row.classList.add('highlight-row');
-                    }
-                });
-                table.addEventListener('focusout', (e) => {
-                    if (e.target.tagName === 'INPUT') {
-                        const row = e.target.closest('tr');
-                        if (row) row.classList.remove('highlight-row');
-                    }
-                });
+    function renderTable(prefix, list, tbodyId) {
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = '';
+        list.forEach((name, idx) => {
+            const id = `${prefix}_${idx}`;
+            const isHalf = (prefix==='f6' && f6Half.includes(name)) || (prefix==='f1' && f1Half.includes(name));
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${name} ${isHalf?'<span class="half-badge">Half Plate</span>':''}</td>
+                <td><input type="number" id="${id}_am" class="count-input" oninput="calculateRow('${id}')" onkeydown="moveOnEnter(event,'${prefix}',${idx},'am')"></td>
+                <td><input type="number" id="${id}_refill" class="count-input" oninput="calculateRow('${id}')" onkeydown="moveOnEnter(event,'${prefix}',${idx},'refill')"></td>
+                <td><input type="number" id="${id}_pm" class="count-input" oninput="calculateRow('${id}')" onkeydown="moveOnEnter(event,'${prefix}',${idx},'pm')"></td>
+                <td id="${id}_sold" class="sold-cell">0</td>
+                <td id="${id}_end" class="end-cell">0</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function attachHighlight() {
+        ['f6Table','f1Table'].forEach(id => {
+            document.getElementById(id).addEventListener('focusin', e => {
+                if(e.target.tagName==='INPUT') e.target.closest('tr')?.classList.add('highlight-row');
             });
-        }
-
-        function toggleGuide() {
-            const g = document.getElementById('guide');
-            g.style.display = g.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function renderRows(list, containerId, prefix) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = ''; // Clear existing rows
-            list.forEach((name, i) => {
-                const id = `${prefix}_${i}`;
-                const tr = document.createElement('tr');
-                
-                let isHalfPlate = false;
-                if (prefix === 'f6' && f6HalfPlates.includes(name)) isHalfPlate = true;
-                if (prefix === 'f1' && f1HalfPlates.includes(name)) isHalfPlate = true;
-                
-                if (isHalfPlate) tr.classList.add('half-plate-row');
-
-                tr.innerHTML = `
-                    <td>${name}${isHalfPlate ? '<span class="half-plate-badge">Half Plate</span>' : ''}</td>
-                    <td><input type="number" id="${id}_am" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'am')" oninput="calculateSoldAndEnd('${id}')"></td>
-                    <td><input type="number" id="${id}_refill" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'refill')" oninput="calculateSoldAndEnd('${id}')"></td>
-                    <td><input type="number" id="${id}_pm" class="count-input" onkeydown="handleTab(event, '${prefix}', ${i}, 'pm')" oninput="calculateSoldAndEnd('${id}')"></td>
-                    <td id="${id}_sold" class="sold-text">0</td>
-                    <td id="${id}_end" class="end-text">0</td>
-                `;
-                container.appendChild(tr);
+            document.getElementById(id).addEventListener('focusout', e => {
+                if(e.target.tagName==='INPUT') e.target.closest('tr')?.classList.remove('highlight-row');
             });
+        });
+    }
+
+    function moveOnEnter(e,prefix,idx,field) {
+        if(e.key==='Enter'||e.key==='Tab') {
+            e.preventDefault();
+            const list = prefix==='f6'?f6List:f1List;
+            if(idx+1 < list.length) document.getElementById(`${prefix}_${idx+1}_${field}`)?.focus();
         }
+    }
 
-        function handleTab(event, prefix, index, col) {
-            if (event.key === "Enter" || event.key === "Tab") {
-                event.preventDefault();
-                const list = prefix === 'f6' ? f6List : f1List;
-                const nextIndex = index + 1;
-                if (nextIndex < list.length) {
-                    const nextInput = document.getElementById(`${prefix}_${nextIndex}_${col}`);
-                    if (nextInput) nextInput.focus();
-                }
-            }
-        }
+    function calculateRow(id) {
+        const am = parseInt(document.getElementById(`${id}_am`)?.value) || 0;
+        const ref = parseInt(document.getElementById(`${id}_refill`)?.value) || 0;
+        const pm = parseInt(document.getElementById(`${id}_pm`)?.value) || 0;
+        const sold = Math.max(0, (am - pm) + ref);
+        document.getElementById(`${id}_sold`).innerText = sold;
+        document.getElementById(`${id}_end`).innerText = pm;
+        const endEl = document.getElementById(`${id}_end`);
+        if(pm>0 && pm<5) endEl.classList.add('low-stock'); else endEl.classList.remove('low-stock');
+        updateTotals(); saveAll();
+    }
 
-        // ONLY function that calculates Sold and End
-        // Sold = AM - PM + Refill (if Refill > 0)
-        function calculateSoldAndEnd(id) {
-            const amInput = document.getElementById(`${id}_am`);
-            const refillInput = document.getElementById(`${id}_refill`);
-            const pmInput = document.getElementById(`${id}_pm`);
-            const soldEl = document.getElementById(`${id}_sold`);
-            const endEl = document.getElementById(`${id}_end`);
+    function updateTotals() {
+        let f6=0,f1=0;
+        f6List.forEach((_,i)=> f6 += parseInt(document.getElementById(`f6_${i}_end`)?.innerText)||0);
+        f1List.forEach((_,i)=> f1 += parseInt(document.getElementById(`f1_${i}_end`)?.innerText)||0);
+        document.getElementById('total-f6').innerText = f6;
+        document.getElementById('total-f1').innerText = f1;
+        document.getElementById('total-grand').innerText = f6+f1;
 
-            const am = parseInt(amInput.value) || 0;
-            const refill = parseInt(refillInput.value) || 0;
-            const pm = parseInt(pmInput.value) || 0;
+        const sales = {};
+        f6List.forEach((n,i)=>{ let s=parseInt(document.getElementById(`f6_${i}_sold`)?.innerText)||0; if(s>0) sales[n]=(sales[n]||0)+s; });
+        f1List.forEach((n,i)=>{ let s=parseInt(document.getElementById(`f1_${i}_sold`)?.innerText)||0; if(s>0) sales[n]=(sales[n]||0)+s; });
+        const top = Object.entries(sales).sort((a,b)=>b[1]-a[1]).slice(0,5);
+        const listDiv = document.getElementById('topSellersList');
+        listDiv.innerHTML = top.length ? top.map(([n,c])=>`<span class="seller-tag">${n} ${c}</span>`).join('') : '<span class="seller-tag">—</span>';
+    }
 
-            // Calculate Sold: AM - PM + Refill (only add refill if it exists)
-            const soldValue = Math.max(0, am - pm + refill);
-            
-            // Update displays
-            soldEl.textContent = soldValue;
-            endEl.textContent = pm;
+    function lockAM() {
+        document.querySelectorAll('input[id$="_am"]').forEach(i=>i.disabled=true);
+        const btn = document.getElementById('lockAmBtn');
+        btn.innerText = '🔒 AM Locked'; btn.disabled = true; btn.style.opacity = 0.7;
+        showToast('Morning counts locked'); saveAll();
+    }
 
-            // Low stock warning
-            if (pm > 0 && pm < 5) {
-                endEl.classList.add('low-stock');
-            } else {
-                endEl.classList.remove('low-stock');
-            }
+    function switchFloor(f) {
+        document.querySelectorAll('.floor-view').forEach(v=>v.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.getElementById(`${f}-view`).classList.add('active');
+        document.getElementById(`btn-${f}`).classList.add('active');
+    }
 
-            updateTotals();
-            saveData();
-        }
+    function toggleGuide() { document.getElementById('guideCard').classList.toggle('show'); }
 
-        function updateTotals() {
-            const sum = (prefix, list) => list.reduce((acc, _, i) => {
-                const el = document.getElementById(`${prefix}_${i}_end`);
-                return acc + (el ? (parseInt(el.textContent) || 0) : 0);
-            }, 0);
-            const f6 = sum('f6', f6List);
-            const f1 = sum('f1', f1List);
-            document.getElementById('total-f6').textContent = f6;
-            document.getElementById('total-f1').textContent = f1;
-            document.getElementById('total-grand').textContent = f6 + f1;
-            updateTopSellers();
-        }
+    function updateDateDisplay() {
+        const val = document.getElementById('trackingDate').value;
+        if(val) { const d = new Date(val+'T12:00'); document.getElementById('displayDate').innerText = d.toLocaleDateString('en-US',{weekday:'long', year:'numeric', month:'long', day:'numeric'}); }
+    }
 
-        function updateTopSellers() {
-            const sales = {};
-            
-            // Tally sold counts from 6th floor
-            f6List.forEach((name, i) => {
-                const el = document.getElementById(`f6_${i}_sold`);
-                const sold = el ? (parseInt(el.textContent) || 0) : 0;
-                if (sold > 0) {
-                    sales[name] = (sales[name] || 0) + sold;
-                }
-            });
-            
-            // Tally sold counts from 1st floor
-            f1List.forEach((name, i) => {
-                const el = document.getElementById(`f1_${i}_sold`);
-                const sold = el ? (parseInt(el.textContent) || 0) : 0;
-                if (sold > 0) {
-                    sales[name] = (sales[name] || 0) + sold;
-                }
-            });
-            
-            // Sort by highest sold count and take top 5
-            const sorted = Object.entries(sales).sort((a,b) => b[1] - a[1]).slice(0,5);
-            
-            // Update the display
-            document.getElementById('topSellersList').innerHTML = sorted.length ? sorted.map(([name, count], i) => `
-                <div class="seller-badge">
-                    <span>#${i+1}</span> 
-                    ${name} 
-                    <span class="seller-count">${count}</span>
-                </div>
-            `).join('') : '<div class="seller-badge" style="opacity: 0.5;">Enter counts to track sales...</div>';
-        }
+    function saveAll() {
+        const data = {
+            date:document.getElementById('trackingDate').value, oMod:document.getElementById('openingMod').value, cMod:document.getElementById('closingMod').value,
+            amLocked:document.getElementById('lockAmBtn').disabled,
+            f6:f6List.map((_,i)=>({am:document.getElementById(`f6_${i}_am`)?.value||'', ref:document.getElementById(`f6_${i}_refill`)?.value||'', pm:document.getElementById(`f6_${i}_pm`)?.value||''})),
+            f1:f1List.map((_,i)=>({am:document.getElementById(`f1_${i}_am`)?.value||'', ref:document.getElementById(`f1_${i}_refill`)?.value||'', pm:document.getElementById(`f1_${i}_pm`)?.value||''}))
+        };
+        localStorage.setItem('biss_tracker_ref', JSON.stringify(data));
+    }
 
-        function switchFloor(f) {
-            document.querySelectorAll('.floor-view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`${f}-view`).classList.add('active');
-            document.getElementById(`btn-${f}`).classList.add('active');
-        }
+    function loadAll() {
+        const raw = localStorage.getItem('biss_tracker_ref'); if(!raw) return;
+        const d = JSON.parse(raw);
+        document.getElementById('trackingDate').value = d.date||''; document.getElementById('openingMod').value = d.oMod||''; document.getElementById('closingMod').value = d.cMod||'';
+        const load = (list,prefix,arr)=>{ list.forEach((_,i)=>{ if(arr[i]){ document.getElementById(`${prefix}_${i}_am`).value = arr[i].am||''; document.getElementById(`${prefix}_${i}_refill`).value = arr[i].ref||''; document.getElementById(`${prefix}_${i}_pm`).value = arr[i].pm||''; } if(d.amLocked) document.getElementById(`${prefix}_${i}_am`).disabled = true; calculateRow(`${prefix}_${i}`); }); };
+        load(f6List,'f6',d.f6); load(f1List,'f1',d.f1);
+        if(d.amLocked){ const btn=document.getElementById('lockAmBtn'); btn.innerText='🔒 AM Locked'; btn.disabled=true; btn.style.opacity=0.7; }
+        updateDateDisplay();
+    }
 
-        function updateDateDisplay() {
-            const val = document.getElementById('trackingDate').value;
-            if (!val) return;
-            const d = new Date(val + 'T00:00:00');
-            document.getElementById('displayDate').textContent = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        }
+    function confirmReset(){ if(confirm('Clear all data?')){ localStorage.removeItem('biss_tracker_ref'); location.reload(); } }
+    function openReportModal(){ document.getElementById('reportModal').style.display='flex'; }
+    function closeReportModal(){ document.getElementById('reportModal').style.display='none'; }
+    function generateReport(type){
+        const date = document.getElementById('displayDate').innerText;
+        const mod = document.getElementById(type==='am'?'openingMod':'closingMod').value||'N/A';
+        let report = `BISSINGER'S ${type.toUpperCase()} REPORT\n${date}\nMOD: ${mod}\n\n`;
+        const sec = (title,list,prefix)=>{ let b=''; list.forEach((n,i)=>{ let am=document.getElementById(`${prefix}_${i}_am`)?.value||0, pm=document.getElementById(`${prefix}_${i}_pm`)?.value||0, sold=document.getElementById(`${prefix}_${i}_sold`)?.innerText||0; if(type==='am' && am>0) b+=`${n} : AM ${am}\n`; if(type==='pm' && (pm>0||sold>0)) b+=`${n} : SOLD ${sold}  |  END ${pm}\n`; }); if(b) report += `--- ${title} ---\n${b}\n`; };
+        sec('6TH FLOOR',f6List,'f6'); sec('1ST FLOOR',f1List,'f1');
+        const ta = document.createElement('textarea'); ta.value=report; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        showToast('Report copied'); closeReportModal();
+    }
+    function showToast(m){ const t=document.getElementById('toast'); t.innerText=m; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2000); }
 
-        function lockAM() {
-            document.querySelectorAll('input[id$="_am"]').forEach(i => i.disabled = true);
-            const b = document.getElementById('lockAmBtn');
-            b.textContent = "AM Locked"; 
-            b.disabled = true; 
-            b.style.opacity = "0.5";
-            saveData();
-            showToast("Morning counts locked.");
-        }
-
-        function confirmReset() {
-            if (window.confirm("Clear all data for today?")) {
-                localStorage.removeItem('biss_truffle_full_v2');
-                location.reload();
-            }
-        }
-
-        function saveData() {
-            const mapData = (list, prefix) => list.map((_, i) => ({
-                am: document.getElementById(`${prefix}_${i}_am`)?.value || "",
-                ref: document.getElementById(`${prefix}_${i}_refill`)?.value || "",
-                pm: document.getElementById(`${prefix}_${i}_pm`)?.value || ""
-            }));
-            const data = {
-                date: document.getElementById('trackingDate').value,
-                oMod: document.getElementById('openingMod').value,
-                cMod: document.getElementById('closingMod').value,
-                amLocked: document.getElementById('lockAmBtn').disabled,
-                f6: mapData(f6List, 'f6'),
-                f1: mapData(f1List, 'f1')
-            };
-            localStorage.setItem('biss_truffle_full_v2', JSON.stringify(data));
-        }
-
-        function loadData() {
-            const raw = localStorage.getItem('biss_truffle_full_v2');
-            if (!raw) return;
-            const d = JSON.parse(raw);
-            
-            document.getElementById('trackingDate').value = d.date || '';
-            document.getElementById('openingMod').value = d.oMod || '';
-            document.getElementById('closingMod').value = d.cMod || '';
-            
-            const fill = (list, prefix, arr) => {
-                if (!arr) return;
-                list.forEach((_, i) => {
-                    const id = `${prefix}_${i}`;
-                    if (arr[i]) {
-                        const amInput = document.getElementById(`${id}_am`);
-                        const refInput = document.getElementById(`${id}_refill`);
-                        const pmInput = document.getElementById(`${id}_pm`);
-                        
-                        if (amInput) amInput.value = arr[i].am || '';
-                        if (refInput) refInput.value = arr[i].ref || '';
-                        if (pmInput) pmInput.value = arr[i].pm || '';
-                    }
-                    if (d.amLocked) {
-                        const amInput = document.getElementById(`${id}_am`);
-                        if (amInput) amInput.disabled = true;
-                    }
-                    calculateSoldAndEnd(id);
-                });
-            };
-            
-            fill(f6List, 'f6', d.f6); 
-            fill(f1List, 'f1', d.f1);
-            
-            if (d.amLocked) {
-                const b = document.getElementById('lockAmBtn');
-                b.textContent = "AM Locked"; 
-                b.disabled = true; 
-                b.style.opacity = "0.5";
-            }
-            updateDateDisplay();
-        }
-
-        function openReport() { 
-            document.getElementById('reportModal').style.display = 'flex'; 
-        }
-        
-        function closeReport() { 
-            document.getElementById('reportModal').style.display = 'none'; 
-        }
-        
-        function showToast(m) { 
-            const t = document.getElementById('toast'); 
-            t.textContent = m; 
-            t.style.opacity = 1; 
-            setTimeout(() => t.style.opacity = 0, 2500); 
-        }
-
-        function generateReport(type) {
-            const date = document.getElementById('displayDate').textContent;
-            const mod = document.getElementById(type === 'am' ? 'openingMod' : 'closingMod').value || 'N/A';
-            let report = `BISSINGER'S ${type.toUpperCase()} REPORT\nDate: ${date}\nMOD: ${mod}\n\n`;
-
-            const section = (title, list, prefix) => {
-                let reportContent = `--- ${title} FLOOR ---\n`;
-                let hasData = false;
-                list.forEach((name, i) => {
-                    const id = `${prefix}_${i}`;
-                    const am = document.getElementById(`${id}_am`)?.value || 0;
-                    const pm = document.getElementById(`${id}_pm`)?.value || 0;
-                    const sold = document.getElementById(`${id}_sold`)?.textContent || 0;
-                    if (type === 'am' && am > 0) {
-                        reportContent += `${name}: AM ${am}\n`;
-                        hasData = true;
-                    }
-                    if (type === 'pm' && (pm > 0 || sold > 0)) {
-                        reportContent += `${name}: Sold ${sold} | End ${pm}\n`;
-                        hasData = true;
-                    }
-                });
-                if (hasData) report += reportContent + `\n`;
-            };
-
-            section("6TH", f6List, "f6"); 
-            section("1ST", f1List, "f1");
-            
-            const textArea = document.createElement("textarea");
-            textArea.value = report;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showToast("Report copied!");
-            } catch (err) {
-                console.error('Unable to copy', err);
-            }
-            document.body.removeChild(textArea);
-            closeReport();
-        }
-    </script>
+    window.calculateRow = calculateRow; window.moveOnEnter = moveOnEnter;
+</script>
 </body>
 </html>
