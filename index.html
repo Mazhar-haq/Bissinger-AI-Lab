@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bissinger's Herald Square Truffle Tracker</title>
-    <link rel="stylesheet" href="layout.css">
+    <link rel="stylesheet" href="truffle-tracker.css">
 </head>
 <body onload="init()">
 
@@ -19,13 +19,17 @@
     <div id="guide" class="card" style="display: none;">
         <div class="guide-section">
             <h3>☀️ Morning Shift</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter counts in <b>AM</b> column. Click <b>Lock AM</b> when done.</p>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;">Enter counts in <b>AM</b> column. Click <b>Lock AM</b> when done to prevent accidental changes.</p>
         </div>
         <div class="guide-section">
             <h3>🔄 Refill Column</h3>
-            <p style="font-size: 0.75rem; margin-bottom: 5px;"><b>Sold</b> = (AM − PM) + Refill</p>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;">Use <b>Refill</b> to add truffles brought from the back during the day. This increases the sold count.</p>
         </div>
-        <button onclick="toggleGuide()" class="close-guide-btn">CLOSE GUIDE</button>
+        <div class="guide-section">
+            <h3>📊 Auto-Calculations</h3>
+            <p style="font-size: 0.75rem; margin-bottom: 5px;"><b>Sold</b> = (AM − PM) + Refill<br><b>End</b> = PM count at close</p>
+        </div>
+        <button onclick="toggleGuide()" style="width: 100%; padding: 8px; background: var(--bissingers-brown); color: var(--bissingers-gold); border: none; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">CLOSE GUIDE</button>
     </div>
 
     <div class="card">
@@ -50,12 +54,12 @@
             </div>
         </div>
         <div style="display: flex; gap: 8px; margin-top: 15px;">
-            <button id="lockAmBtn" class="primary-btn" onclick="lockAM()">Lock AM Counts</button>
-            <button class="info-btn" onclick="openReport()">📋 Report</button>
-            <button class="success-btn" onclick="window.print()">🖨️ PDF</button>
+            <button id="lockAmBtn" style="flex: 2; padding: 10px; background: var(--bissingers-gold); border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="lockAM()">Lock AM Counts</button>
+            <button style="flex: 1; padding: 10px; background: var(--info); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="openReport()">📋 Report</button>
+            <button style="flex: 1; padding: 10px; background: var(--success); color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;" onclick="window.print()">🖨️ PDF</button>
         </div>
         <div style="margin-top: 10px;">
-            <button class="reset-btn" onclick="confirmReset()">Clear All Today's Data</button>
+            <button style="width: 100%; padding: 8px; background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.7rem; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase;" onclick="confirmReset()">Clear All Today's Data</button>
         </div>
     </div>
 
@@ -128,12 +132,12 @@
         </div>
     </div>
 
-    <div id="reportModal" style="display:none;" class="modal-overlay">
-        <div class="modal-content">
+    <div id="reportModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:25px; border-radius:8px; width:90%; max-width:350px; text-align:center;">
             <h3>Report Generation</h3>
-            <button class="info-btn" onclick="generateReport('am')">Copy AM Report</button>
-            <button class="primary-btn" onclick="generateReport('pm')">Copy PM Report</button>
-            <button class="cancel-btn" onclick="closeReport()">Cancel</button>
+            <button style="width:100%; padding:12px; margin:8px 0; background:var(--info); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="generateReport('am')">Copy AM Report</button>
+            <button style="width:100%; padding:12px; margin:8px 0; background:var(--bissingers-brown); color:var(--bissingers-gold); border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="generateReport('pm')">Copy PM Report</button>
+            <button style="width:100%; padding:10px; margin-top:10px; border:none; background:#eee; cursor:pointer;" onclick="closeReport()">Cancel</button>
         </div>
     </div>
 
